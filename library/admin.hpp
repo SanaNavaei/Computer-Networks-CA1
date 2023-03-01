@@ -1,5 +1,5 @@
 #ifndef ADMIN_HPP_
-#define ADMIN_HPP_ "ADMIN_HPP_"\
+#define ADMIN_HPP_ "ADMIN_HPP_"
 
 #include <string>
 #include <vector>

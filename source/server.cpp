@@ -47,7 +47,7 @@ int Server::setup_server(int port)
 
     return server_fd;
 }
-bool Server::build()
+void Server::build()
 {
     fd_set master_set, working_set;
     int server_fd;
@@ -84,7 +84,6 @@ int main(int argc, char * argv[])
 {
     readJson data;
     Server server(data);
-    if(!server.build())
-        std::cout << "error in building" << std::endl;
+    server.build();
     return 0;
 }

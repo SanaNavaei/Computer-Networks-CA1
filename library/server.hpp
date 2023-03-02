@@ -8,6 +8,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "readJson.hpp"
+
+#define MAX_CLIENTS 10
+
 class Server
 {
 public:

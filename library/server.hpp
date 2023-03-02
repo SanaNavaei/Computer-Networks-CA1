@@ -7,7 +7,7 @@ class Server
 {
 public:
     Server(readJson data);
-    bool build();
+    void build();
     int setup_server(int port);
 private:
     readJson data;

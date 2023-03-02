@@ -3,5 +3,13 @@
 
 #include <iostream>
 #include "readJson.hpp"
-
+class Server
+{
+public:
+    Server(readJson data);
+    bool build();
+    int setup_server(int port);
+private:
+    readJson data;
+};
 #endif

@@ -7,14 +7,14 @@
 class Rooms
 {
 public:
-    Rooms(std::string number_, int status_, int price_, int maxCapacity_, int capacity_, std::vector<std::vector<std::string>> userInRooms_);
+    Rooms(std::string number_, int status_, int price_, int maxCapacity_, int capacity_, std::vector<userInRoom> userInRooms_);
 private:
     std::string number;
     int status;
     int price;
     int maxCapacity;
     int capacity;
-    std::vector<std::vector<std::string>> userInRooms;
+    std::vector<userInRoom> userInRooms;
 };
 
 #endif

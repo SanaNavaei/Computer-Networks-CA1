@@ -9,3 +9,13 @@ User::User(int id_, std::string user_, std::string password_, std::string purse_
     phoneNumber = phoneNumber_;
     address = address_;
 }
+
+std::string User::getname()
+{
+    return user;
+}
+
+std::string User::getpassword()
+{
+    return password;
+}

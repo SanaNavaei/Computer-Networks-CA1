@@ -41,18 +41,39 @@ int Server::setup_server(int port)
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
-    bind(server_fd, (struct sockaddr *)&address, sizeof(address));
-    
-    listen(server_fd, 4);
+    //check if there is more than one server running on the same port
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    {
+        std::cout << "There is a server running on this port." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    listen(server_fd, MAX_CLIENTS);
 
     return server_fd;
 }
+
+int acceptClient(int server_fd) 
+{
+    int client_fd;
+    struct sockaddr_in client_address;
+    int address_len = sizeof(client_address);
+    client_fd = accept(server_fd, (struct sockaddr *)&client_address, (socklen_t*) &address_len);
+    return client_fd;
+}
+
 void Server::build()
 {
     fd_set master_set, working_set;
     int server_fd;
     char buffer[1024] = {0};
     server_fd = setup_server(data.getPort());
+    if (server_fd < 0)
+    {
+        std::cout << "error in building." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    std::cout << "server is running." << std::endl;
     
     std::cout << "enter the date:\n";
     std::string input;
@@ -79,6 +100,46 @@ void Server::build()
         exit(EXIT_FAILURE);
     }
     
+    FD_SET(server_fd, &master_set);
+    FD_ZERO(&master_set);
+    FD_ZERO(&working_set);
+
+    int max_sd = server_fd;
+    while (true)
+    {
+        working_set = master_set;
+        select(max_sd + 1, &working_set, NULL, NULL, NULL);
+
+        for (int i = 0; i <= max_sd; i++)
+        {
+            if (FD_ISSET(i, &working_set))
+            {
+                if (i == server_fd) //new client
+                {
+                    int client_fd = acceptClient(server_fd);
+                    FD_SET(client_fd, &master_set);
+                    if (client_fd > max_sd)
+                    {
+                        max_sd = client_fd;
+                    }
+                }
+                else //client is sending a message
+                {
+                    int bytes_recieved = recv(i, buffer, 1024, 0);
+                    if (bytes_recieved > 0)
+                    {
+                        //send(i, buffer, bytes_recieved, 0);
+                    }
+                    else
+                    {
+                        close(i);
+                        FD_CLR(i, &master_set);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
 }
 int main(int argc, char * argv[])
 {

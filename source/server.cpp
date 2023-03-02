@@ -2,6 +2,34 @@
 
 Server::Server(readJson data_) : data(data_) {}
 
+bool checkDateFormat(const std::string& input) {
+    std::stringstream ss(input);
+    int day, month, year;
+    char delim;
+    if (!(ss >> day >> delim >> month >> delim >> year)) {
+        return false;
+    }
+    // Check if all parts are integers
+    if (ss.fail() || !ss.eof()) {
+        return false;
+    }
+    // Check for valid date
+    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2100) {
+        return false;
+    }
+    //check the length of each part
+    std::string str = std::to_string(day);
+    if(str.size() != 2)
+        return false;
+    str = std::to_string(month);
+    if(str.size() != 2)
+        return false;
+    str = std::to_string(year);
+    if(str.size() != 4)
+        return false;
+    return true;
+}
+
 int Server::setup_server(int port)
 {
     struct sockaddr_in address;
@@ -25,6 +53,32 @@ bool Server::build()
     int server_fd;
     char buffer[1024] = {0};
     server_fd = setup_server(data.getPort());
+    
+    std::cout << "enter the date:\n";
+    std::string input;
+    std::getline(std::cin, input);
+    std::stringstream ss(input);
+    std::string word;
+    ss >> word;
+    if(word != "setTime")
+    {
+        std::cout << "Bad sequence of commands.\n";//error 503
+        exit(EXIT_FAILURE);
+    }
+    std::string date;
+    ss >> date;
+    if (!checkDateFormat(date))
+    {
+        //error 401
+        std::cout << "Invalid value!\n";
+        exit(EXIT_FAILURE);
+    }
+    if(ss >> word)
+    {
+        std::cout << "Bad sequence of commands.\n";//error 503
+        exit(EXIT_FAILURE);
+    }
+    
 }
 int main(int argc, char * argv[])
 {

@@ -15,6 +15,7 @@ class readJson
 {
 public:
     readJson();
+    int getPort();
 private:
     std::string hostName;
     std::vector<User*> users;

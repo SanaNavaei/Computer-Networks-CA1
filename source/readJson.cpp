@@ -46,16 +46,17 @@ readJson::readJson()
 		int maxCapacity = room["maxCapacity"];
 		int capacity = room["capacity"];
 
-		//2d vector for users in room (id, numOfBeds, reserveDate, checkoutDate)
-		std::vector<std::vector<std::string>> userInRooms;
+		//vector of struct to store data of users in room
+        	std::vector<userInRoom> userInRooms;
 		for (auto& user : room["users"])
 		{
-			int id = user["id"];
-			int numOfBeds = user["numOfBeds"];
-			std::string reserveDate = user["reserveDate"];
-			std::string checkoutDate = user["checkoutDate"];
-			userInRooms.push_back({ std::to_string(id), std::to_string(numOfBeds), reserveDate, checkoutDate });
-    	}
+			userInRoom userInRoom;
+            		userInRoom.id = user["id"];
+            		userInRoom.numOfBeds = user["numOfBeds"];
+            		userInRoom.reserveDate = user["reserveDate"];
+            		userInRoom.checkoutDate = user["checkoutDate"];
+            		userInRooms.push_back(userInRoom);
+    		}
 		rooms.push_back(new Rooms(number, status, price, maxCapacity, capacity, userInRooms));
 	}
 }

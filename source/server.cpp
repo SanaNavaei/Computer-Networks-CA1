@@ -19,6 +19,13 @@ int Server::setup_server(int port)
 
     return server_fd;
 }
+bool Server::build()
+{
+    fd_set master_set, working_set;
+    int server_fd;
+    char buffer[1024] = {0};
+    server_fd = setup_server(data.getPort());
+}
 int main(int argc, char * argv[])
 {
     readJson data;

@@ -1,5 +1,8 @@
 #include "../library/readJson.hpp"
-
+int readJson::getPort()
+{
+    return port;
+}
 readJson::readJson()
 {
     //Read config.json

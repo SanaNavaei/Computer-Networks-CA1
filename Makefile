@@ -1,9 +1,15 @@
 CC = g++ -g -std=c++11
 
-all: server.out
+all: server.out client.out
+
+client.out: client.o readJson.o user.o admin.o rooms.o
+	$(CC) $^ -o $@
 
 server.out: server.o readJson.o user.o admin.o rooms.o
 	$(CC) $^ -o $@
+	
+client.o: source/client.cpp library/client.hpp library/readJson.hpp
+	$(CC) -c $< -o $@
 
 server.o: source/server.cpp library/server.hpp library/readJson.hpp
 	$(CC) -c $< -o $@

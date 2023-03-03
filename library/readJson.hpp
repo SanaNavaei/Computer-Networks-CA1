@@ -15,10 +15,10 @@ class readJson
 {
 public:
     readJson();
+    std::vector<User*> users;
     int getPort();
 private:
     std::string hostName;
-    std::vector<User*> users;
     std::vector<Admin*> admins;
     std::vector<Rooms*> rooms;
     int port;

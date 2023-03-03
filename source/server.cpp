@@ -2,6 +2,117 @@
 
 Server::Server(readJson data_) : data(data_) {}
 
+void Server::signin(std::string username, std::string password, int fd)
+{
+    std::string message;
+    for (int i = 0; i < data.users.size(); i++)
+    {
+        if (data.users[i]->getname() == username && data.users[i]->getpassword() == password)
+        {
+            message = ERR230;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+    }
+    message = ERR430;
+    send(fd, message.c_str(), message.size(), 0);
+    return;
+}
+
+bool Server::checkIsANumber(std::string input, int fd)
+{
+    for (int i = 0; i < input.size(); i++)
+    {
+        if (input[i] < '0' || input[i] > '9')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void Server::signup(std::string username, std::string password, std::string purse, std::string phoneNumber, 
+                    std::string address, int fd)
+{
+    if(checkIsANumber(purse, fd) == false)
+    {
+        std::string message = ERR503;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+    else if(checkIsANumber(phoneNumber, fd) == false)
+    {
+        std::string message = ERR503;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+    data.users.push_back(new User(data.users.size(), username, password, purse, phoneNumber, address));
+    
+    std::string message = ERR231;
+    send(fd, message.c_str(), message.size(), 0);
+}
+
+void Server::checkusername(std::string name, int fd)
+{
+    std::string message;
+
+    //check if the user already exists
+    for (int i = 0; i < data.users.size();i++)
+    {
+        std::string username = data.users[i]->getname();
+        if (username == name)
+        {
+            message =  ERR451;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+    }
+    message = ERR311;
+    send(fd, message.c_str(), message.size(), 0);
+}
+
+void Server::checkCommand(char buff[], int fd)
+{
+    std::string command(buff);
+    std::stringstream ss(command);
+    std::string order, word, str;
+    std::getline(ss, order, '/');
+    if (order == "signup")
+    {
+        std::getline(ss, word, '/');
+        if (word == "") 
+        {
+            std::string error =  ERR430;
+            send(fd, error.c_str(), error.size(), 0);
+        }
+        checkusername(word,fd);
+    }
+    else if (order == "signin")
+    {
+        std::string username, password;
+        std::getline (ss, username, '/');
+        std::getline (ss, password, '/');
+        if (username == "" || password == "")
+        {
+            std::string error =  ERR430;
+            send(fd, error.c_str(), error.size(), 0);
+        }
+        else 
+            signin(username, password, fd);
+    }
+    else if(order == "signup2")
+    {
+        std::string username, password, purse, phoneNumber, address;
+        std::getline (ss, username, '/');
+        std::getline (ss, password, '/');
+        std::getline (ss, purse, '/');
+        std::getline (ss, phoneNumber, '/');
+        std::getline (ss, address, '/');
+
+        signup(username, password, purse, phoneNumber, address, fd);
+    }
+}
+
 bool checkDateFormat(const std::string& input) {
     std::stringstream ss(input);
     std::string day, month, year;
@@ -39,6 +150,7 @@ int Server::setup_server(int port)
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
+    
     //check if there is more than one server running on the same port
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
@@ -81,28 +193,27 @@ void Server::build()
     ss >> word;
     if(word != "setTime")
     {
-        std::cout << "Bad sequence of commands.\n";//error 503
+        std::cout << ERR503 << std::endl;
         exit(EXIT_FAILURE);
     }
     std::string date;
     ss >> date;
     if (!checkDateFormat(date))
     {
-        //error 401
-        std::cout << "Invalid value!\n";
+        std::cout << ERR401 << std::endl;
         exit(EXIT_FAILURE);
     }
     if(ss >> word)
     {
-        std::cout << "Bad sequence of commands.\n";//error 503
+        std::cout << ERR503 << std::endl;
         exit(EXIT_FAILURE);
     }
     
-    FD_SET(server_fd, &master_set);
     FD_ZERO(&master_set);
     FD_ZERO(&working_set);
-
     int max_sd = server_fd;
+    FD_SET(server_fd, &master_set);
+    
     while (true)
     {
         working_set = master_set;
@@ -117,28 +228,26 @@ void Server::build()
                     int client_fd = acceptClient(server_fd);
                     FD_SET(client_fd, &master_set);
                     if (client_fd > max_sd)
-                    {
                         max_sd = client_fd;
-                    }
                 }
                 else //client is sending a message
                 {
+                    memset(buffer, 0, 1024);
                     int bytes_recieved = recv(i, buffer, 1024, 0);
-                    if (bytes_recieved > 0)
+                    if(bytes_recieved == 0)
                     {
-                        //send(i, buffer, bytes_recieved, 0);
-                    }
-                    else
-                    {
+                        std::cout << "client disconnected." << std::endl;
                         close(i);
                         FD_CLR(i, &master_set);
                         continue;
                     }
+                    checkCommand(buffer,i);
                 }
             }
         }
     }
 }
+
 int main(int argc, char * argv[])
 {
     readJson data;

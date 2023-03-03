@@ -1,7 +1,8 @@
 #include "../library/client.hpp"
 
 Client::Client() {}
-void show_list(std::vector<User *> &users);
+
+std::string new_username;
 
 void action_to_be_done(int choice)
 {
@@ -39,6 +40,7 @@ void action_to_be_done(int choice)
             break;
     }
 }
+
 bool isNumberBetween0And9(std::string str) {
     // Check if the string only contains one character and that it is a digit
     if (str.length() == 1 && isdigit(str[0])) {
@@ -51,79 +53,55 @@ bool isNumberBetween0And9(std::string str) {
     return false;
 }
 
-void signin(std::string username, std::string password, std::vector<User*>& users)
+void user_list()
 {
-    for (int i = 0; i < users.size(); i++)
+    while(true)
     {
-        if (users[i]->getname() == username && users[i]->getpassword() == password)
-        {
-            std::cout << "230: User logged in." << std::endl;
-            return;
-        }
-    }
-    std::cout << "430: Invalid username or password." << std::endl;
-    return;
-}
-
-bool checkIsANumber(std::string input, std::vector<User*>& users)
-{
-    for (int i = 0; i < input.size(); i++)
-    {
-        if (input[i] < '0' || input[i] > '9')
+        std::cout << "Hi! Choose one of the items below by just entering the number of that.\n";
+        std::cout << "1. View user information\n";
+        std::cout << "2. View all users\n";
+        std::cout << "3. View rooms information\n";
+        std::cout << "4. Booking\n";
+        std::cout << "5. Canceling\n";
+        std::cout << "6. pass day\n";
+        std::cout << "7. Edit information\n";
+        std::cout << "8. Leaving room\n";
+        std::cout << "9. Rooms\n";
+        std::cout << "0. Logout\n";
+        std::cout << "--> <choice number> :\n";
+        std::string choice_num;
+        std::getline(std::cin >> std::ws, choice_num);
+        if (!isNumberBetween0And9(choice_num))
         {
             std::cout << "503: Bad sequence of commands." << std::endl;
-            return false;
+            continue;               
+        }
+        else
+        {
+            action_to_be_done(stoi(choice_num));
         }
     }
-    return true;
 }
 
-void signup(std::string name, std::vector<User*>& users)
+std::string get_data_signup()
 {
-    //check if the user already exists
-    bool isExisted = false;
-    for (int i = 0; i < users.size();i++)
-    {
-        std::string username = users[i]->getname();
-        if (username == name)
-        {
-            std::cout << "451: User already existed!" << std::endl;
-            isExisted = true;
-            show_list(users);
-            return;
-        }
-    }
-
-    //create a new user
-    if (!isExisted)
-    {
-        std::cout << "311: User Signed up. Enter your password, purse, phone and address." << std::endl;
-        std::string password, purse, phoneNumber, address;
-        std:: cout << "Password: ";
-        std::cin >> password;
-        std:: cout << "Purse: ";
-        std::cin >> purse;
-        if (checkIsANumber(purse, users) == false)
-        {
-            return;
-        }
-        std:: cout << "Phone Number: ";
-        std::cin >> phoneNumber;
-        if (checkIsANumber(phoneNumber, users) == false)
-        {
-            return;
-        }
-        std:: cout << "Address: ";
-        std::getline(std::cin >> std::ws, address);
-        users.push_back(new User(users.size(), name, password, purse, phoneNumber, address));
-        std::cout << "231: User successfully signed up." << std::endl;
-    }
+    std::string password, purse, phoneNumber, address;
+    std:: cout << "Password: ";
+    std::cin >> password;
+    std:: cout << "Purse: ";
+    std::cin >> purse;
+    std:: cout << "Phone Number: ";
+    std::cin >> phoneNumber;
+    std:: cout << "Address: ";
+    std::getline(std::cin >> std::ws, address);
+    std::string str = "signup2/" + new_username + "/" + password + "/" + purse + "/" + phoneNumber + "/" + address;
+    return str;
 }
 
-void define_command(std::string command, std::vector<User*>& users)
+std::string define_command(std::string command)
 {
     std::stringstream ss(command);
-    std::string order,word;
+    std::string order,word, str;
     std::getline (ss, order, ' ');
 
     if(order == "signin")
@@ -132,63 +110,94 @@ void define_command(std::string command, std::vector<User*>& users)
         std::string username = word;
         std::getline (ss, word, ' ');
         std::string password = word;
-        signin(username, password, users);
+        str = "signin/" + username + "/" + password;
+        
     }
     else if(order == "signup")
     {
         std::getline (ss, word, ' ');
-        signup(word, users);
+        new_username = word;
+        str = "signup/" + word;
     }
     else
-        std::cout << "503: Bad sequence of commands." << std::endl;
+        str = "error";
+    return str;
 }
 
-void show_list(std::vector<User*>& users)
+std::string show_list()
 {
-    while(true)
-    {
-        std::cout << "Welcome! Please choose one of the following commands:" << std::endl;
-        std::cout << "signin <username> <password>" << std::endl;
-        std::cout << "signup <username>" << std::endl;
+    std::cout << "Please choose one of the following commands:" << std::endl;
+    std::cout << "signin <username> <password>" << std::endl;
+    std::cout << "signup <username>" << std::endl;
 
-        std::string str;
-        std::getline(std::cin >> std::ws, str);
-        if(!define_command(str, users))
-            continue;
-        while(true)
+    std::string str;
+    std::getline(std::cin >> std::ws, str);
+    return str;
+}
+
+int connectServer(int port)
+{
+    int fd;
+    struct sockaddr_in server_address;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(port);
+    server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    if (connect(fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
+    { // checking for errors
+        printf("Error in connecting to server\n");
+    }
+
+    return fd;
+}
+
+void Client::build()
+{
+    std::cout << "Client is running..." << std::endl;
+    int fd = connectServer(8000);
+    char buffer[1024] = {0};
+    while (true)
+    {
+        std::string command;
+        std::string str(buffer);
+
+        //logged in list
+        if(str == ERR230)
         {
-            std::cout << "Hi! Choose one of the items below by just entering the number of that.\n";
-            std::cout << "1. View user information\n";
-            std::cout << "2. View all users\n";
-            std::cout << "3. View rooms information\n";
-            std::cout << "4. Booking\n";
-            std::cout << "5. Canceling\n";
-            std::cout << "6. pass day\n";
-            std::cout << "7. Edit information\n";
-            std::cout << "8. Leaving room\n";
-            std::cout << "9. Rooms\n";
-            std::cout << "0. Logout\n";
-            std::cout << "--> <choice number> :\n";
-            std::string choice_num;
-            std::getline(std::cin >> std::ws, choice_num);
-            if (!isNumberBetween0And9(choice_num))
+            user_list();
+        }
+
+        //print error
+        if (str != ERR311)
+        {
+            command = show_list();
+            command = define_command(command);
+            if (command == "error" && str != ERR503)
             {
-                std::cout << "503: Bad sequence of commands." << std::endl;
-                continue;               
-            }
-            else
-            {
-                action_to_be_done(stoi(choice_num));
+                std::cout << ERR503 << std::endl;
+                continue;
             }
         }
+
+        //get data for signup
+        if (str == ERR311)
+        {
+            command = get_data_signup();
+        }
+        send(fd, command.c_str(), command.size(), 0);
+        memset(buffer, 0, sizeof(buffer));
+        read(fd, buffer, 1024);
+        std::cout << buffer << std::endl;
     }
 }
 
 int main(int argc, char const *argv[])
 {
     readJson data;
-    std::vector<User*> users = data.getUsers();
     Client client;
-    show_list(users);
+    client.build();
     return 0;
 }

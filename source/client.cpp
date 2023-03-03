@@ -3,6 +3,54 @@
 Client::Client() {}
 void show_list(std::vector<User *> &users);
 
+void action_to_be_done(int choice)
+{
+    switch(choice)
+    {
+        case 1:
+            //View user information
+            break;
+        case 2:
+            //View all users
+            break;
+        case 3:
+            //View rooms information
+            break;
+        case 4:
+            //Booking
+            break;
+        case 5:
+            //Canceling
+            break;
+        case 6:
+            //pass day
+            break;
+        case 7:
+            //Edit information
+            break;
+        case 8:
+            //Leaving room
+            break;
+        case 9:
+            //Rooms
+            break;
+        case 0:
+            //Logout
+            break;
+    }
+}
+bool isNumberBetween0And9(std::string str) {
+    // Check if the string only contains one character and that it is a digit
+    if (str.length() == 1 && isdigit(str[0])) {
+        int num = stoi(str);
+        // Check if the number is between 0 and 9
+        if (num >= 0 && num <= 9) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void signin(std::string username, std::string password, std::vector<User*>& users)
 {
     for (int i = 0; i < users.size(); i++)
@@ -105,7 +153,34 @@ void show_list(std::vector<User*>& users)
 
         std::string str;
         std::getline(std::cin >> std::ws, str);
-        define_command(str, users);
+        if(!define_command(str, users))
+            continue;
+        while(true)
+        {
+            std::cout << "Hi! Choose one of the items below by just entering the number of that.\n";
+            std::cout << "1. View user information\n";
+            std::cout << "2. View all users\n";
+            std::cout << "3. View rooms information\n";
+            std::cout << "4. Booking\n";
+            std::cout << "5. Canceling\n";
+            std::cout << "6. pass day\n";
+            std::cout << "7. Edit information\n";
+            std::cout << "8. Leaving room\n";
+            std::cout << "9. Rooms\n";
+            std::cout << "0. Logout\n";
+            std::cout << "--> <choice number> :\n";
+            std::string choice_num;
+            std::getline(std::cin >> std::ws, choice_num);
+            if (!isNumberBetween0And9(choice_num))
+            {
+                std::cout << "503: Bad sequence of commands." << std::endl;
+                continue;               
+            }
+            else
+            {
+                action_to_be_done(stoi(choice_num));
+            }
+        }
     }
 }
 

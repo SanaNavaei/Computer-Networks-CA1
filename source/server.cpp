@@ -4,28 +4,26 @@ Server::Server(readJson data_) : data(data_) {}
 
 bool checkDateFormat(const std::string& input) {
     std::stringstream ss(input);
-    int day, month, year;
-    char delim;
-    if (!(ss >> day >> delim >> month >> delim >> year)) {
-        return false;
-    }
+    std::string day, month, year;
+    
+    std::getline (ss, day, DELIM);
+    std::getline (ss, month, DELIM);
+    std::getline (ss,year, DELIM);
+    
     // Check if all parts are integers
     if (ss.fail() || !ss.eof()) {
         return false;
     }
     // Check for valid date
-    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2100) {
+    if (stoi(day) < 1 || stoi(day) > 31 || stoi(month) < 1 || stoi(month) > 12 || stoi(year) < 1900 || stoi(year) > 2100) {
         return false;
     }
     //check the length of each part
-    std::string str = std::to_string(day);
-    if(str.size() != 2)
+    if(day.size() != 2)
         return false;
-    str = std::to_string(month);
-    if(str.size() != 2)
+    if(month.size() != 2)
         return false;
-    str = std::to_string(year);
-    if(str.size() != 4)
+    if(year.size() != 4)
         return false;
     return true;
 }

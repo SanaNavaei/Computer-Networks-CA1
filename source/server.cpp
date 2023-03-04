@@ -67,7 +67,9 @@ void Server::checkusername(std::string name, int fd)
             return;
         }
     }
-    message = ERR311;
+    std::stringstream ss;
+    ss << ERR311 << "/" << name;
+    message = ss.str();
     send(fd, message.c_str(), message.size(), 0);
 }
 

@@ -2,8 +2,6 @@
 
 Client::Client() {}
 
-std::string new_username;
-
 void action_to_be_done(int choice)
 {
     switch(choice)
@@ -83,7 +81,7 @@ void user_list()
     }
 }
 
-std::string get_data_signup()
+std::string get_data_signup(std::string new_username)
 {
     std::string password, purse, phoneNumber, address;
     std:: cout << "Password: ";
@@ -116,7 +114,6 @@ std::string define_command(std::string command)
     else if(order == "signup")
     {
         std::getline (ss, word, ' ');
-        new_username = word;
         str = "signup/" + word;
     }
     else
@@ -163,15 +160,22 @@ void Client::build()
     {
         std::string command;
         std::string str(buffer);
-
+        
+        std::vector<std::string> tokens;
+        std::stringstream ss(str);
+        std::string token;
+        while (std::getline(ss, token, '/')){
+            tokens.push_back(token);
+        }
+        
         //logged in list
-        if(str == ERR230)
+        if(!tokens.empty() && tokens[0] == ERR230)
         {
             user_list();
         }
 
         //print error
-        if (str != ERR311)
+        if (tokens.empty() || tokens[0] != ERR311)
         {
             command = show_list();
             command = define_command(command);
@@ -183,9 +187,9 @@ void Client::build()
         }
 
         //get data for signup
-        if (str == ERR311)
+        if (!tokens.empty() && tokens[0] == ERR311)
         {
-            command = get_data_signup();
+            command = get_data_signup(tokens[1]);
         }
         send(fd, command.c_str(), command.size(), 0);
         memset(buffer, 0, sizeof(buffer));

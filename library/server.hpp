@@ -18,6 +18,7 @@
 #define ERR430 "430: Invalid username or password."
 #define ERR451 "451: User already existed!"
 #define ERR503 "503: Bad sequence of commands."
+#define DELIM '-'
 
 class Server
 {

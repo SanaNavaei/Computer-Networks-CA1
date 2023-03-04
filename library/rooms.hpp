@@ -4,6 +4,14 @@
 #include <string>
 #include <vector>
 
+struct userInRoom
+{
+    int id;
+    int numOfBeds;
+    std::string reserveDate;
+    std::string checkoutDate;
+};
+
 class Rooms
 {
 public:

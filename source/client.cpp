@@ -2,43 +2,6 @@
 
 Client::Client() {}
 
-void action_to_be_done(int choice)
-{
-    switch(choice)
-    {
-        case 1:
-            //View user information
-            break;
-        case 2:
-            //View all users
-            break;
-        case 3:
-            //View rooms information
-            break;
-        case 4:
-            //Booking
-            break;
-        case 5:
-            //Canceling
-            break;
-        case 6:
-            //pass day
-            break;
-        case 7:
-            //Edit information
-            break;
-        case 8:
-            //Leaving room
-            break;
-        case 9:
-            //Rooms
-            break;
-        case 0:
-            //Logout
-            break;
-    }
-}
-
 bool isNumberBetween0And9(std::string str) {
     // Check if the string only contains one character and that it is a digit
     if (str.length() == 1 && isdigit(str[0])) {
@@ -51,7 +14,7 @@ bool isNumberBetween0And9(std::string str) {
     return false;
 }
 
-void user_list()
+std::string user_list()
 {
     while(true)
     {
@@ -76,9 +39,10 @@ void user_list()
         }
         else
         {
-            action_to_be_done(stoi(choice_num));
+            return "menu/" + choice_num;
         }
     }
+    return "";
 }
 
 std::string get_data_signup(std::string new_username)
@@ -132,7 +96,7 @@ std::string show_list()
     return str;
 }
 
-int connectServer(int port)
+int Client::connectServer(int port)
 {
     int fd;
     struct sockaddr_in server_address;
@@ -141,7 +105,7 @@ int connectServer(int port)
 
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(port);
-    server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_address.sin_addr.s_addr = inet_addr(data.getHostName().c_str());
 
     if (connect(fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
     { // checking for errors
@@ -154,7 +118,7 @@ int connectServer(int port)
 void Client::build()
 {
     std::cout << "Client is running..." << std::endl;
-    int fd = connectServer(8000);
+    int fd = connectServer(data.getPort());
     char buffer[1024] = {0};
     while (true)
     {
@@ -169,7 +133,7 @@ void Client::build()
         }
         
         //logged in list
-        if(!tokens.empty() && tokens[0] == ERR230)
+        if(!tokens.empty() && (tokens[0] == ERR230 || isNumberBetween0And9(tokens[0])))
         {
             user_list();
         }

@@ -3,6 +3,10 @@ int readJson::getPort()
 {
     return port;
 }
+std::string readJson::getHostName()
+{
+    return hostName;
+}
 readJson::readJson()
 {
     //Read config.json

@@ -11,12 +11,14 @@
 #include "rooms.hpp"
 
 using json = nlohmann::json;
+
 class readJson
 {
 public:
     readJson();
     std::vector<User*> users;
     int getPort();
+    std::string getHostName();
 private:
     std::string hostName;
     std::vector<Admin*> admins;

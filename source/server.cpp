@@ -2,6 +2,43 @@
 
 Server::Server(readJson data_) : data(data_) {}
 
+void action_to_be_done(int choice)
+{
+    switch(choice)
+    {
+        case 1:
+            //View user information
+            break;
+        case 2:
+            //View all users
+            break;
+        case 3:
+            //View rooms information
+            break;
+        case 4:
+            //Booking
+            break;
+        case 5:
+            //Canceling
+            break;
+        case 6:
+            //pass day
+            break;
+        case 7:
+            //Edit information
+            break;
+        case 8:
+            //Leaving room
+            break;
+        case 9:
+            //Rooms
+            break;
+        case 0:
+            //Logout
+            break;
+    }
+}
+
 void Server::signin(std::string username, std::string password, int fd)
 {
     std::string message;
@@ -112,6 +149,14 @@ void Server::checkCommand(char buff[], int fd)
         std::getline (ss, address, '/');
 
         signup(username, password, purse, phoneNumber, address, fd);
+    }
+    else if(order == "menu")
+    {
+        std::string command;
+        std::getline(ss, command, '/');
+        std::string message = command;
+
+        send(fd, message.c_str(), message.size(), 0);
     }
 }
 

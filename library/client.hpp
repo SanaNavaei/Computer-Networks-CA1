@@ -19,6 +19,7 @@ class Client
 public:
     Client();
     void build();
+    int connectServer(int port);
 private:
     readJson data;
 };

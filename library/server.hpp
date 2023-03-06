@@ -11,6 +11,7 @@
 #include "readJson.hpp"
 
 #define MAX_CLIENTS 10
+#define ERR201 "201: User logged out successfully."
 #define ERR230 "230: User logged in."
 #define ERR231 "231: User successfully signed up."
 #define ERR311 "311: User Signed up. Enter your password, purse, phone and address."
@@ -31,6 +32,7 @@ public:
     void signin(std::string username, std::string password, int fd);
     int setup_server(int port);
     bool checkIsANumber(std::string input, int fd);
+    void action_to_be_done(int choice, int id, int fd, std::istringstream& ss);
 private:
     readJson data;
 };

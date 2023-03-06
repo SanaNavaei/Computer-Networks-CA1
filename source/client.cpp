@@ -2,9 +2,8 @@
 
 Client::Client() {}
 
-std::string action_sentences(int choice, int id)
+std::string action_sentences(int choice, int id, std::string user_admin)
 {
-    std::string inp1;
     switch (choice)
     {
         case 1:
@@ -119,7 +118,7 @@ bool isNumberBetween0And9(std::string str) {
     return false;
 }
 
-std::string user_list()
+std::string user_list(int id, std::string user_admin)
 {
     while(true)
     {
@@ -144,7 +143,7 @@ std::string user_list()
         }
         else
         {
-            return action_sentences(stoi(choice_num),id);
+            return action_sentences(stoi(choice_num),id, user_admin);
         }
     }
     return "";
@@ -226,6 +225,7 @@ void Client::build()
     int fd = connectServer(data.getPort());
     char buffer[1024] = {0};
     int id;
+    std::string user_admin;
     while (true)
     {
         std::string command;
@@ -242,6 +242,7 @@ void Client::build()
         if(!tokens.empty() && tokens[0] == ERR230) 
         {
             id = stoi(tokens[1]);
+            user_admin = tokens[2];
             command = user_list(id);
             if (command == "error" && str != ERR503)
             {
@@ -256,6 +257,7 @@ void Client::build()
             if(isNumberBetween0And9(tokens[1]))
             {
                 id = stoi(tokens[1]);
+                user_admin = tokens[2];
                 command = user_list(id);
                 if (command == "error" && str != ERR503)
                 {

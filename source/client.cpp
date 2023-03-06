@@ -51,13 +51,22 @@ std::string action_sentences(int choice, int id, std::string user_admin)
         }   
         case 7:{
             std::string password, phone, address;
-            std::cout << "new password" << std::endl;
-            std::cin >> password;
-            std::cout << "phone" << std::endl;
-            std::cin >> phone;
-            std::cout << "address" << std::endl;
-            std::cin >> address;
-            return "menu/7/" + std::to_string(id) + "/" + password + "/" + phone + "/" + address;
+            if (user_admin == "admin")
+            {
+                std::cout << "new password" << std::endl;
+                std::cin >> password;
+                return "menu/7/" + std::to_string(id) + "/" + password;
+            }
+            else if(user_admin == "user")
+            {
+                std::cout << "new password" << std::endl;
+                std::cin >> password;
+                std::cout << "phone" << std::endl;
+                std::cin >> phone;
+                std::cout << "address" << std::endl;
+                std::cin >> address;
+                return "menu/7/" + std::to_string(id) + "/" + password + "/" + phone + "/" + address;
+            }
         }
         case 8:{
             std::cout << "room <value>" << std::endl;

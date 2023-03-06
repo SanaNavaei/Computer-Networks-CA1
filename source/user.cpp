@@ -19,3 +19,8 @@ std::string User::getpassword()
 {
     return password;
 }
+
+int User::getid()
+{
+    return id;
+}

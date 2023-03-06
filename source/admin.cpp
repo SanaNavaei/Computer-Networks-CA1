@@ -21,3 +21,8 @@ int Admin::getid()
 {
     return id;
 }
+
+void Admin::setpassword(std::string password_)
+{
+    password = password_;
+}

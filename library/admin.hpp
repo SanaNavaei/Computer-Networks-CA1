@@ -8,6 +8,9 @@ class Admin
 {
 public:
     Admin(int id_, std::string user_, std::string password_);
+    std::string getname();
+    std::string getpassword();
+    int getid();
 private:
     int id;
     std::string user;

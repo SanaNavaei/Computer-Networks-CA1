@@ -24,3 +24,28 @@ int User::getid()
 {
     return id;
 }
+
+std::string User::getaddress()
+{
+    return address;
+}
+
+std::string User::getphone()
+{
+    return phoneNumber;
+}
+
+void User::setpassword(std::string password_)
+{
+    password = password_;
+}
+
+void User::setaddress(std::string address_)
+{
+    address = address_;
+}
+
+void User::setphoneNumber(std::string phoneNumber_)
+{
+    phoneNumber = phoneNumber_;
+}

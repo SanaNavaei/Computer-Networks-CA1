@@ -11,6 +11,7 @@ public:
     std::string getname();
     std::string getpassword();
     int getid();
+    void setpassword(std::string password_);
 private:
     int id;
     std::string user;

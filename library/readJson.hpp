@@ -17,12 +17,12 @@ class readJson
 public:
     readJson();
     std::vector<User*> users;
+    std::vector<Admin*> admins;
+    std::vector<Rooms*> rooms;
     int getPort();
     std::string getHostName();
 private:
     std::string hostName;
-    std::vector<Admin*> admins;
-    std::vector<Rooms*> rooms;
     int port;
 };
 

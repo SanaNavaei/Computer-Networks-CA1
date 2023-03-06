@@ -33,7 +33,10 @@ public:
     int setup_server(int port);
     bool checkIsANumber(std::string input, int fd);
     void action_to_be_done(int choice, int id, int fd, std::istringstream& ss);
+    void logout(int id, int fd);
 private:
     readJson data;
+    std::vector<int> loggedInIds;
 };
+
 #endif

@@ -2,6 +2,60 @@
 
 Server::Server(readJson data_) : data(data_) {}
 
+void Server::edit_information(int id, int fd, std::istringstream& ss)
+{
+    std::string message;
+    for (int i = 0; i < data.users.size(); i++)
+    {
+        if (data.users[i]->getid() == id)
+        {
+            std::string password, phone, address;
+            std::getline(ss, password, '/'); //password
+            std::getline(ss, phone, '/'); //phone
+            std::getline(ss, address, '/'); //address
+            if (data.users[i]->getpassword() == password || data.users[i]->getaddress() == address || data.users[i]->getphone() == phone)
+            {
+                message = ERR503;
+                message += "/" + std::to_string(data.users[i]->getid()) + "/user";
+                std::cout << "User id: " << id << " tried to edit information." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                return;
+            }
+            data.users[i]->setpassword(password);
+            data.users[i]->setaddress(address);
+            data.users[i]->setphoneNumber(phone);
+            message = ERR312;
+            message += "/" + std::to_string(data.users[i]->getid()) + "/user";
+            std::cout << "User id: " << id << " edited information." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+    }
+    for (int i = 0; i < data.admins.size(); i++)
+    {
+        if (data.admins[i]->getid() == id)
+        {
+            std::string password;
+            std::getline(ss, password, '/'); //password
+            if (data.admins[i]->getpassword() == password)
+            {
+                message = ERR503;
+                message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
+                std::cout << "Admin id: " << id << " tried to edit information." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                return;
+            }
+            data.admins[i]->setpassword(password);
+            message = ERR312;
+            message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
+            std::cout << "Admin id: " << id << " edited information." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+    }
+    return;
+}
+
 void Server::logout(int id, int fd)
 {
     for (int i = 0; i < loggedInIds.size(); i++)
@@ -39,7 +93,7 @@ void action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
             //pass day
             break;
         case 7:
-            //Edit information
+            edit_information(id, fd, ss);
             break;
         case 8:
             //Leaving room

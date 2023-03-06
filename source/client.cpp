@@ -2,6 +2,111 @@
 
 Client::Client() {}
 
+std::string action_sentences(int choice, int id)
+{
+    std::string inp1;
+    switch (choice)
+    {
+        case 1:
+            return "menu/1/" + std::to_string(id);
+        case 2:
+            return "menu/2/" + std::to_string(id);
+        case 3:
+            return "menu/3/" + std::to_string(id);
+        case 4:{
+            std::cout << "book <RoomNum> <NumOfBeds> <CheckInDate> <CheckOutDate>" << std::endl;
+            std::string command, RoomNum, NumOfBeds, CheckInDate, CheckOutDate, book;
+            std::getline(std::cin >> std::ws, command);
+            std::stringstream ss(command);
+            std::getline (ss, book, ' ');
+            if (book != "book")
+                return "error";
+            std::getline(ss, RoomNum, ' ');
+            std::getline (ss, NumOfBeds, ' ');
+            std::getline (ss, CheckInDate, ' ');
+            std::getline (ss, CheckOutDate, ' ');
+            return "menu/4/" + std::to_string(id) + "/" + RoomNum + "/" + NumOfBeds + "/" + CheckInDate + "/" + CheckOutDate;
+        }
+        case 5:{
+            std::cout << "cancel <RoomNum> <Num>" << std::endl;
+            std::string command, RoomNum, Num, cancel;
+            std::getline(std::cin >> std::ws, command);
+            std::stringstream ss(command);
+            std::getline (ss, cancel, ' ');
+            if (cancel != "cancel")
+                return "error";
+            std::getline(ss, RoomNum, ' ');
+            std::getline (ss, Num, ' ');
+            return "menu/5/" + std::to_string(id) + "/" + RoomNum + "/" + Num;
+        }
+        case 6:{
+            std::cout << "passDay <value>" << std::endl;
+            std::string command, passDay, value;
+            std::getline(std::cin >> std::ws, command);
+            std::stringstream ss(command);
+            std::getline (ss, passDay, ' ');
+            if (passDay != "passDay")
+                return "error";
+            std::getline(ss, value, ' ');
+            return "menu/6/" + std::to_string(id) + "/" + value;
+        }   
+        case 7:{
+            std::string password, phone, address;
+            std::cout << "new password" << std::endl;
+            std::cin >> password;
+            std::cout << "phone" << std::endl;
+            std::cin >> phone;
+            std::cout << "address" << std::endl;
+            std::cin >> address;
+            return "menu/7/" + std::to_string(id) + "/" + password + "/" + phone + "/" + address;
+        }
+        case 8:{
+            std::cout << "room <value>" << std::endl;
+            std::string command, room, value;
+            std::getline(std::cin >> std::ws, command);
+            std::stringstream ss(command);
+            std::getline (ss, room, ' ');
+            if (room != "room")
+                return "error";
+            std::getline(ss, value, ' ');
+            return "menu/8/" + std::to_string(id) + "/" + value;
+        }
+        case 9:{
+            std::cout << "add <RoomNum> <Max Capacity> <Price>" << std::endl;
+            std::cout << "modify <RoomNum> <New Max Capacity> <New Price>" << std::endl;
+            std::cout << "remove <RoomNum>" << std::endl;
+            std::string command, order, RoomNum, MaxCapacity, Price;
+            std::getline(std::cin >> std::ws, command);
+            std::stringstream ss(command);
+            std::getline (ss, order, ' ');
+            if(order == "add")
+            {
+                std::getline(ss, RoomNum, ' ');
+                std::getline (ss, MaxCapacity, ' ');
+                std::getline (ss, Price, ' ');
+                return "menu/9/" + std::to_string(id) + "/" + RoomNum + "/" + MaxCapacity + "/" + Price;
+            }
+            else if(order == "modify")
+            {
+                std::getline(ss, RoomNum, ' ');
+                std::getline (ss, MaxCapacity, ' ');
+                std::getline (ss, Price, ' ');
+                return "menu/9/" + std::to_string(id) + "/" + RoomNum + "/" + MaxCapacity + "/" + Price;
+            }
+            else if(order == "remove")
+            {
+                std::getline(ss, RoomNum, ' ');
+                return "menu/9/" + std::to_string(id) + "/" + RoomNum;
+            }
+            else
+                return "error";
+        }
+        case 0:
+            return "menu/0/" + std::to_string(id);
+    }
+    return "";
+}
+
 bool isNumberBetween0And9(std::string str) {
     // Check if the string only contains one character and that it is a digit
     if (str.length() == 1 && isdigit(str[0])) {
@@ -39,7 +144,7 @@ std::string user_list()
         }
         else
         {
-            return "menu/" + choice_num;
+            return action_sentences(stoi(choice_num),id);
         }
     }
     return "";
@@ -120,6 +225,7 @@ void Client::build()
     std::cout << "Client is running..." << std::endl;
     int fd = connectServer(data.getPort());
     char buffer[1024] = {0};
+    int id;
     while (true)
     {
         std::string command;
@@ -133,13 +239,34 @@ void Client::build()
         }
         
         //logged in list
-        if(!tokens.empty() && (tokens[0] == ERR230 || isNumberBetween0And9(tokens[0])))
+        if(!tokens.empty() && tokens[0] == ERR230) 
         {
-            user_list();
+            id = stoi(tokens[1]);
+            command = user_list(id);
+            if (command == "error" && str != ERR503)
+            {
+                std::cout << ERR503 << std::endl;
+                continue;
+            }
+
+        }
+        
+        else if(tokens.size() > 1 && tokens[0] != ERR311)
+        {
+            if(isNumberBetween0And9(tokens[1]))
+            {
+                id = stoi(tokens[1]);
+                command = user_list(id);
+                if (command == "error" && str != ERR503)
+                {
+                    std::cout << ERR503 << std::endl;
+                    continue;
+                }
+            }
         }
 
-        //print error
-        if (tokens.empty() || tokens[0] != ERR311)
+        //sign up
+        else if (tokens.empty() || tokens[0] != ERR311)
         {
             command = show_list();
             command = define_command(command);
@@ -158,7 +285,13 @@ void Client::build()
         send(fd, command.c_str(), command.size(), 0);
         memset(buffer, 0, sizeof(buffer));
         read(fd, buffer, 1024);
-        std::cout << buffer << std::endl;
+        ss.clear();
+        ss.str(buffer);
+        tokens.clear();
+        while (std::getline(ss, token, '/')){
+            tokens.push_back(token);
+        }
+        std::cout << tokens[0] << std::endl;
     }
 }
 

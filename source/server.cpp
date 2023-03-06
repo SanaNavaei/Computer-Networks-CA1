@@ -1,7 +1,20 @@
 #include "../library/server.hpp"
 
 Server::Server(readJson data_) : data(data_) {}
-fd_set master_set;
+
+void Server::logout(int id, int fd)
+{
+    for (int i = 0; i < loggedInIds.size(); i++)
+    {
+        if (loggedInIds[i] == id)
+        {
+            loggedInIds.erase(loggedInIds.begin() + i);
+            std::cout << "User id: " << id << " logged out." << std::endl;
+            send(fd, ERR201, strlen(ERR201), 0);
+            break;
+        }
+    }
+}
 
 void action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
 {
@@ -35,7 +48,7 @@ void action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
             //Rooms
             break;
         case 0:
-            //Logout
+            logout(id, fd);
             break;
     }
 }
@@ -48,7 +61,8 @@ void Server::signin(std::string username, std::string password, int fd)
         if (data.users[i]->getname() == username && data.users[i]->getpassword() == password)
         {
             message = ERR230;
-            message += "/" + std::to_string(data.users[i]->getid());
+            message += "/" + std::to_string(data.users[i]->getid()) + "/user" ;
+            loggedInIds.push_back(data.users[i]->getid());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -59,7 +73,8 @@ void Server::signin(std::string username, std::string password, int fd)
         if (data.admins[i]->getname() == username && data.admins[i]->getpassword() == password)
         {
             message = ERR230;
-            message += "/" + std::to_string(data.admins[i]->getid());
+            message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
+            loggedInIds.push_back(data.admins[i]->getid());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }

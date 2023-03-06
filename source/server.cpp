@@ -1,8 +1,9 @@
 #include "../library/server.hpp"
 
 Server::Server(readJson data_) : data(data_) {}
+fd_set master_set;
 
-void action_to_be_done(int choice)
+void action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
 {
     switch(choice)
     {
@@ -47,6 +48,18 @@ void Server::signin(std::string username, std::string password, int fd)
         if (data.users[i]->getname() == username && data.users[i]->getpassword() == password)
         {
             message = ERR230;
+            message += "/" + std::to_string(data.users[i]->getid());
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+    }
+    
+    for (int i = 0; i < data.admins.size(); i++)
+    {
+        if (data.admins[i]->getname() == username && data.admins[i]->getpassword() == password)
+        {
+            message = ERR230;
+            message += "/" + std::to_string(data.admins[i]->getid());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -104,6 +117,18 @@ void Server::checkusername(std::string name, int fd)
             return;
         }
     }
+    
+    //check if the admin already exists
+    for (int i = 0; i < data.admins.size();i++)
+    {
+        std::string username = data.admins[i]->getname();
+        if (username == name)
+        {
+            message =  ERR451;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+    }
     std::stringstream ss;
     ss << ERR311 << "/" << name;
     message = ss.str();
@@ -152,11 +177,10 @@ void Server::checkCommand(char buff[], int fd)
     }
     else if(order == "menu")
     {
-        std::string command;
-        std::getline(ss, command, '/');
-        std::string message = command;
-
-        send(fd, message.c_str(), message.size(), 0);
+        std::string command_num, id;
+        std::getline(ss, command_num, '/');
+        std::getline(ss, id, '/');
+        action_to_be_done(stoi(command_num), stoi(id), fd, ss);
     }
 }
 

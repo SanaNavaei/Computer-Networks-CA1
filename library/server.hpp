@@ -15,6 +15,7 @@
 #define ERR230 "230: User logged in."
 #define ERR231 "231: User successfully signed up."
 #define ERR311 "311: User Signed up. Enter your password, purse, phone and address."
+#define ERR312 "312: Information was changed successfully."
 #define ERR401 "401: Invalid value!"
 #define ERR430 "430: Invalid username or password."
 #define ERR451 "451: User already existed!"
@@ -34,6 +35,7 @@ public:
     bool checkIsANumber(std::string input, int fd);
     void action_to_be_done(int choice, int id, int fd, std::istringstream& ss);
     void logout(int id, int fd);
+    void edit_information(int id, int fd, std::istringstream &ss);
 private:
     readJson data;
     std::vector<int> loggedInIds;

@@ -11,6 +11,7 @@ public:
     std::string getpassword();
     std::string getphone();
     std::string getaddress();
+    std::string getpurse();
     void setpassword(std::string password_);
     void setaddress(std::string address_);
     void setphoneNumber(std::string phoneNumber_);

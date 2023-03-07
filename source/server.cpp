@@ -2,6 +2,13 @@
 
 Server::Server(readJson data_) : data(data_) {}
 
+void Server::set_date(std::string day_, std::string month_, std::string year_)
+{
+    sys_date.day = day_;
+    sys_date.month = month_;
+    sys_date.year = year_;
+}
+
 void Server::edit_information(int id, int fd, std::istringstream& ss)
 {
     std::string message;
@@ -253,7 +260,7 @@ void Server::checkCommand(char buff[], int fd)
     }
 }
 
-bool checkDateFormat(const std::string& input) {
+bool Server::checkDateFormat(const std::string& input) {
     std::stringstream ss(input);
     std::string day, month, year;
     
@@ -276,6 +283,7 @@ bool checkDateFormat(const std::string& input) {
         return false;
     if(year.size() != 4)
         return false;
+    set_date(day, month, year);
     return true;
 }
 

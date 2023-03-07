@@ -92,6 +92,7 @@ std::string Server::get_info(int id)
             ss << "phoneNumber: " << data.users[i]->getPhoneNumber() << std::endl;
             ss << "address: " << data.users[i]->getAddress() << std::endl;
             ss << "###########################" << std::endl;
+            ss << "/" << id <<"/user";
             break;
         }
     }
@@ -103,10 +104,10 @@ std::string Server::get_info(int id)
             ss << "name: " << data.users[i]->getname() << std::endl;
             ss << "password: " << data.users[i]->getpassword() << std::endl;
             ss << "###########################" << std::endl;
+            ss << "/" << id <<"/admin";
             break;
         }
     }
-    ss << "/" << id;
     std::string info;
     info = ss.str();
     return info;

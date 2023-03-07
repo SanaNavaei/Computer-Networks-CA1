@@ -70,11 +70,17 @@ std::string action_sentences(int choice, int id, std::string user_admin)
         }
         case 8:{
             std::cout << "room <value>" << std::endl;
-            std::string command, room, value;
+            if(user_admin == "admin")
+            {
+                std::cout << "capacity <new capacity>" << std::endl;
+            }
+            std::string command, roomOrCapacity, value;
             std::getline(std::cin >> std::ws, command);
             std::stringstream ss(command);
-            std::getline (ss, room, ' ');
-            if (room != "room")
+            std::getline (ss, roomOrCapacity, ' ');
+            if (user_admin == "user" && roomOrCapacity != "room")
+                return "error";
+            if (user_admin == "admin" && (roomOrCapacity != "room" && roomOrCapacity != "capacity"))
                 return "error";
             std::getline(ss, value, ' ');
             return "menu/8/" + std::to_string(id) + "/" + value;

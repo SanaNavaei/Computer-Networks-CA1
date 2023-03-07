@@ -302,7 +302,7 @@ void Client::build()
         while (std::getline(ss, token, '/')){
             tokens.push_back(token);
         }
-        if (tokens[0][0] == '#')
+        if (tokens[0][0] == '#' || tokens[0] == ERR403)
         {
             std::cout << tokens[0] << std::endl;
             id = stoi(tokens[1]);

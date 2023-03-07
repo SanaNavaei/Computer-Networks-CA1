@@ -35,6 +35,11 @@ std::string User::getphone()
     return phoneNumber;
 }
 
+std::string User::getpurse()
+{
+    return purse;
+}
+
 void User::setpassword(std::string password_)
 {
     password = password_;

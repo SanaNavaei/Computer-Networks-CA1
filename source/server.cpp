@@ -77,13 +77,52 @@ void Server::logout(int id, int fd)
     }
 }
 
-void action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
+std::string Server::get_info(int id)
+{
+    std::stringstream ss;
+    ss << "###########################" << std::endl;
+    for (int i = 0; i < data.users.size(); i++)
+    {
+        if (id == data.users[i]->getid())
+        {
+            ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
+            ss << "name: " << data.users[i]->getname() << std::endl;
+            ss << "password: " << data.users[i]->getpassword() << std::endl;
+            ss << "purse: " << data.users[i]->getPurse() << std::endl;
+            ss << "phoneNumber: " << data.users[i]->getPhoneNumber() << std::endl;
+            ss << "address: " << data.users[i]->getAddress() << std::endl;
+            ss << "###########################" << std::endl;
+            break;
+        }
+    }
+    for (int i = 0; i < data.admins.size(); i++)
+    {
+        if (id == data.admins[i]->getid())
+        {
+            ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
+            ss << "name: " << data.users[i]->getname() << std::endl;
+            ss << "password: " << data.users[i]->getpassword() << std::endl;
+            ss << "###########################" << std::endl;
+            break;
+        }
+    }
+    ss << "/" << id;
+    std::string info;
+    info = ss.str();
+    return info;
+}
+
+void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
 {
     switch(choice)
     {
-        case 1:
-            //View user information
+        case 1: //View user information
+        {
+            std::string userORadmin_info;
+            userORadmin_info = get_info(id);
+            send(fd, userORadmin_info.c_str(), userORadmin_info.size(), 0);
             break;
+        }
         case 2:
             //View all users
             break;

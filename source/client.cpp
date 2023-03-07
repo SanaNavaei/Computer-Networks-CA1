@@ -80,6 +80,10 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             return "menu/8/" + std::to_string(id) + "/" + value;
         }
         case 9:{
+            if(user_admin == "user")
+            {
+                return "error403";
+            }
             std::cout << "add <RoomNum> <Max Capacity> <Price>" << std::endl;
             std::cout << "modify <RoomNum> <New Max Capacity> <New Price>" << std::endl;
             std::cout << "remove <RoomNum>" << std::endl;
@@ -92,19 +96,19 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::getline(ss, RoomNum, ' ');
                 std::getline (ss, MaxCapacity, ' ');
                 std::getline (ss, Price, ' ');
-                return "menu/9/" + std::to_string(id) + "/" + RoomNum + "/" + MaxCapacity + "/" + Price;
+                return "menu/9/" + std::to_string(id) + "/add/" + RoomNum + "/" + MaxCapacity + "/" + Price;
             }
             else if(order == "modify")
             {
                 std::getline(ss, RoomNum, ' ');
                 std::getline (ss, MaxCapacity, ' ');
                 std::getline (ss, Price, ' ');
-                return "menu/9/" + std::to_string(id) + "/" + RoomNum + "/" + MaxCapacity + "/" + Price;
+                return "menu/9/" + std::to_string(id) + "/modify/" + RoomNum + "/" + MaxCapacity + "/" + Price;
             }
             else if(order == "remove")
             {
                 std::getline(ss, RoomNum, ' ');
-                return "menu/9/" + std::to_string(id) + "/" + RoomNum;
+                return "menu/9/" + std::to_string(id) + "/remove/" + RoomNum;
             }
             else
                 return "error";
@@ -147,7 +151,7 @@ std::string user_list(int id, std::string user_admin)
         std::getline(std::cin >> std::ws, choice_num);
         if (!isNumberBetween0And9(choice_num))
         {
-            std::cout << "503: Bad sequence of commands." << std::endl;
+            std::cout << ERR503 << std::endl;
             continue;               
         }
         else
@@ -258,7 +262,11 @@ void Client::build()
                 std::cout << ERR503 << std::endl;
                 continue;
             }
-
+            if(command == "error403")
+            {
+                std::cout << ERR403 << std::endl;
+                continue;
+            }
         }
         
         else if(tokens.size() > 1 && tokens[0] != ERR311)
@@ -271,6 +279,11 @@ void Client::build()
                 if (command == "error" && str != ERR503)
                 {
                     std::cout << ERR503 << std::endl;
+                    continue;
+                }
+                if(command == "error403")
+                {
+                    std::cout << ERR403 << std::endl;
                     continue;
                 }
             }

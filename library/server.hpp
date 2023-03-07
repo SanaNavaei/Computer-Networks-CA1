@@ -20,6 +20,7 @@
 #define ERR430 "430: Invalid username or password."
 #define ERR451 "451: User already existed!"
 #define ERR503 "503: Bad sequence of commands."
+#define ERR403 "403: Access denied!"
 #define DELIM '-'
 
 struct Date {
@@ -43,6 +44,8 @@ public:
     bool checkIsANumber(std::string input, int fd);
     void action_to_be_done(int choice, int id, int fd, std::istringstream& ss);
     std::string get_info(int id);
+    std::string user_info_gathering(int id);
+    bool check_if_is_admin(int id);
     void logout(int id, int fd);
     void edit_information(int id, int fd, std::istringstream &ss);
 private:

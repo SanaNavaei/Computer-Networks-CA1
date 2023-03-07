@@ -12,8 +12,8 @@
 
 #define ERR230 "230: User logged in."
 #define ERR311 "311: User Signed up. Enter your password, purse, phone and address."
-#define ERR503 "503: Bad sequence of commands."
 #define ERR403 "403: Access denied!"
+#define ERR503 "503: Bad sequence of commands."
 
 class Client
 {

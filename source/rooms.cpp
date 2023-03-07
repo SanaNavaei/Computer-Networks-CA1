@@ -40,3 +40,12 @@ std::vector<userInRoom> Rooms::getusers()
     return userInRooms;
 }
 
+void Rooms::set_price(int price_)
+{
+    price = price_;
+}
+
+void Rooms::set_maxcap(int maxCapacity_)
+{
+    maxCapacity = maxCapacity_;
+}

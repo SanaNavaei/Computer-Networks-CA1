@@ -63,6 +63,83 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
     return;
 }
 
+void Server::leave_room(int id, int fd, std::istringstream& ss)
+{
+    std::string message, user_admin;
+    std::string value, roomOrCapacity;
+    std::getline(ss, roomOrCapacity, '/'); //roomOrCapacity
+    std::getline(ss, value, '/'); //room_number
+
+    if (check_if_is_admin(id) == true)
+        user_admin = "admin";
+    else
+        user_admin = "user";
+
+    //check if there is empty field
+    if (value == "")
+    {
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/" + user_admin;
+        std::cout << "User id: " << id << " tried to leave room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+
+    //check if value is number
+    if (checkIsANumber(value, fd) == false)
+    {
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/" + user_admin;
+        std::cout << "User id: " << id << " tried to leave room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+
+    if(roomOrCapacity == "room")
+    {
+        for (int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == value)  //check if room exist
+            {
+                std::vector<userInRoom> usersExists = data.rooms[i]->getusers();
+                int size = usersExists.size();
+                for (int j = 0; j < size; j++)
+                {
+                    if (usersExists[j].id == id) //check if user exist in room
+                    {
+                        usersExists.erase(usersExists.begin() + j);
+                        data.rooms[i]->set_capacity(data.rooms[i]->getcapacity() + 1);
+                        if(data.rooms[i]->getcapacity() == 1)
+                            data.rooms[i]->set_capacity(0);
+                        //set new userexist vector in room
+                        data.rooms[i]->set_userInRooms(usersExists);
+                        message = ERR413;
+                        message += "/" + std::to_string(id) + "/" + user_admin;
+                        std::cout << "User id: " << id << " left room." << std::endl;
+                        send(fd, message.c_str(), message.size(), 0);
+                        return;
+                    }
+                }
+
+                //user not exist in room
+                message = ERR102;
+                message += "/" + std::to_string(id) + "/" + user_admin;
+                std::cout << "User id: " << id << " tried to leave room." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                return;
+            }
+        }
+
+        //room not exist
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/" + user_admin;
+        std::cout << "User id: " << id << " tried to leave room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+}
+
+
 bool Server::check_room_exist(std::string room_number)
 {
     for (int i = 0; i < data.rooms.size(); i++)
@@ -420,7 +497,7 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             edit_information(id, fd, ss);
             break;
         case 8:
-            //Leaving room
+            leave_room(id, fd, ss);
             break;
         case 9:
             edit_rooms(id, fd, ss);

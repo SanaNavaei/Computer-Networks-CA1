@@ -255,7 +255,7 @@ void Server::signup(std::string username, std::string password, std::string purs
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
-    data.users.push_back(new User(data.users.size(), username, password, purse, phoneNumber, address));
+    data.users.push_back(new User(data.users.size()+ data.admins.size(), username, password, purse, phoneNumber, address));
     
     std::string message = ERR231;
     send(fd, message.c_str(), message.size(), 0);

@@ -20,7 +20,7 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
             std::getline(ss, password, '/'); //password
             std::getline(ss, phone, '/'); //phone
             std::getline(ss, address, '/'); //address
-            if (data.users[i]->getpassword() == password || data.users[i]->getaddress() == address || data.users[i]->getphone() == phone)
+            if (data.users[i]->getpassword() == password || data.users[i]->getaddress() == address || data.users[i]->getphone() == phone || checkIsANumber(phone, fd) == false)
             {
                 message = ERR503;
                 message += "/" + std::to_string(data.users[i]->getid()) + "/user";
@@ -63,6 +63,237 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
     return;
 }
 
+bool Server::check_room_exist(std::string room_number)
+{
+    for (int i = 0; i < data.rooms.size(); i++)
+    {
+        if (data.rooms[i]->getnum() == room_number)
+            return true;
+    }
+    return false;
+}
+
+void Server::edit_rooms(int id, int fd, std::istringstream& ss)
+{
+    std::string command, message;
+    std::getline(ss, command, '/'); //command
+    if(command == "add")
+    {
+        std::string RoomNum, MaxCapacity, Price;
+        std::getline(ss, RoomNum, '/'); //RoomNum
+        std::getline(ss, MaxCapacity, '/'); //MaxCapacity
+        std::getline(ss, Price, '/'); //Price
+
+        //check if there is empty field
+        if (RoomNum == "" || MaxCapacity == "" || Price == "")
+        {
+            message = ERR503;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to add room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if the fields are numbers
+        if (checkIsANumber(RoomNum, fd) == false || checkIsANumber(MaxCapacity, fd) == false || checkIsANumber(Price, fd) == false)
+        {
+            message = ERR503;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to add room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if room numbeer is already exist
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == RoomNum)
+            {
+                message = ERR111;
+                message += "/" + std::to_string(id) + "/admin";
+                std::cout << "Admin id: " << id << " tried to add room." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                return;
+            }
+        }
+        std::vector<userInRoom> newusers;
+        data.rooms.push_back(new Rooms(RoomNum, 0, stoi(Price), stoi(MaxCapacity), 0, newusers));
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            std::cout << data.rooms[i]->getnum() << std::endl;
+        }
+
+        //send message to client that room added
+        message = ERR104;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "Admin id: " << id << " added room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return; 
+    }
+    else if(command == "modify")
+    {
+        std::string RoomNum, newMaxCapacity, newPrice;
+        std::getline(ss, RoomNum, '/'); //RoomNum
+        std::getline(ss, newMaxCapacity, '/'); //newMaxCapacity
+        std::getline(ss, newPrice, '/'); //newPrice
+
+        //check if there is empty field
+        if (RoomNum == "" || newMaxCapacity == "" || newPrice == "")
+        {
+            message = ERR503;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if the fields are numbers
+        if (checkIsANumber(RoomNum, fd) == false || checkIsANumber(newMaxCapacity, fd) == false || checkIsANumber(newPrice, fd) == false)
+        {
+            message = ERR503;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if room number doesn't exist
+        if(check_room_exist(RoomNum) == false)
+        {
+            message = ERR101;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if the room is full
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == RoomNum)
+            {
+                if (data.rooms[i]->getstatus() == 1)
+                {
+                    message = ERR109;
+                    message += "/" + std::to_string(id) + "/admin";
+                    std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+                    send(fd, message.c_str(), message.size(), 0);
+                    return;
+                }
+            }
+        }
+
+        //check if new values are not same as old values
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == RoomNum)
+            {
+                if (data.rooms[i]->getprice() == stoi(newPrice) || data.rooms[i]->getmax_capacity() == stoi(newMaxCapacity))
+                {
+                    message = ERR503;
+                    message += "/" + std::to_string(id) + "/admin";
+                    std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+                    send(fd, message.c_str(), message.size(), 0);
+                    return;
+                }
+            }
+        }
+        
+        //modify the room
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == RoomNum)
+            {
+                data.rooms[i]->set_price(stoi(newPrice));
+                data.rooms[i]->set_maxcap(stoi(newMaxCapacity));
+                break;
+            }
+        }
+        message = ERR105;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "Admin id: " << id << " modified room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+    else if(command == "remove")
+    {
+        std::string RoomNum;
+        std::getline(ss, RoomNum, '/'); //RoomNum
+
+        //check if there is empty field
+        if (RoomNum == "")
+        {
+            message = ERR503;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if the fields are numbers
+        if (checkIsANumber(RoomNum, fd) == false)
+        {
+            message = ERR503;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if room number doesn't exist
+        if(check_room_exist(RoomNum) == false)
+        {
+            message = ERR101;
+            message += "/" + std::to_string(id) + "/admin";
+            std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+            send(fd, message.c_str(), message.size(), 0);
+            return;
+        }
+
+        //check if the room is full
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == RoomNum)
+            {
+                if (data.rooms[i]->getstatus() == 1)
+                {
+                    message = ERR109;
+                    message += "/" + std::to_string(id) + "/admin";
+                    std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+                    send(fd, message.c_str(), message.size(), 0);
+                    return;
+                }
+            }
+        }
+
+        //remove the room
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            if (data.rooms[i]->getnum() == RoomNum)
+            {
+                data.rooms.erase(data.rooms.begin() + i);
+                break;
+            }
+        }
+        for(int i = 0; i < data.rooms.size(); i++)
+        {
+            std::cout << data.rooms[i]->getnum() << std::endl;
+            std::cout << data.rooms[i]->getprice() << std::endl;
+            std::cout << data.rooms[i]->getmax_capacity() << std::endl;
+        }
+        message = ERR106;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "Admin id: " << id << " removed room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+    else
+    {
+        std::cout << "Admin id: " << id << " tried to edit rooms." << std::endl;
+        send(fd, ERR503, strlen(ERR503), 0);
+    }
+}
+
 void Server::logout(int id, int fd)
 {
     for (int i = 0; i < loggedInIds.size(); i++)
@@ -76,6 +307,7 @@ void Server::logout(int id, int fd)
         }
     }
 }
+
 std::string Server::user_info_gathering(int id)
 {
     std::stringstream ss;
@@ -86,9 +318,9 @@ std::string Server::user_info_gathering(int id)
 
         ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
         ss << "name: " << data.users[i]->getname() << std::endl;
-        ss << "purse: " << data.users[i]->getPurse() << std::endl;
-        ss << "phoneNumber: " << data.users[i]->getPhoneNumber() << std::endl;
-        ss << "address: " << data.users[i]->getAddress() << std::endl;
+        ss << "purse: " << data.users[i]->getpurse() << std::endl;
+        ss << "phoneNumber: " << data.users[i]->getphone() << std::endl;
+        ss << "address: " << data.users[i]->getaddress() << std::endl;
         ss << "###########################" << std::endl;
     }
     ss << "/" << id;
@@ -107,6 +339,7 @@ bool Server::check_if_is_admin(int id)
     }
     return false;
 }
+
 std::string Server::get_info(int id)
 {
     std::stringstream ss;
@@ -118,9 +351,9 @@ std::string Server::get_info(int id)
             ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
             ss << "name: " << data.users[i]->getname() << std::endl;
             ss << "password: " << data.users[i]->getpassword() << std::endl;
-            ss << "purse: " << data.users[i]->getPurse() << std::endl;
-            ss << "phoneNumber: " << data.users[i]->getPhoneNumber() << std::endl;
-            ss << "address: " << data.users[i]->getAddress() << std::endl;
+            ss << "purse: " << data.users[i]->getpurse() << std::endl;
+            ss << "phoneNumber: " << data.users[i]->getphone() << std::endl;
+            ss << "address: " << data.users[i]->getaddress() << std::endl;
             ss << "###########################" << std::endl;
             ss << "/" << id <<"/user";
             break;
@@ -138,6 +371,7 @@ std::string Server::get_info(int id)
             break;
         }
     }
+    ss << "/" << id;
     std::string info;
     info = ss.str();
     return info;
@@ -164,7 +398,7 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             else
             {
                 std::stringstream ss;
-                ss << ERR403 << std::endl << "/" << id << "/user";
+                ss << ERR403 << "/" << id << "/user";
                 info = ss.str();
             }
             send(fd, info.c_str(), info.size(), 0);
@@ -189,7 +423,7 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             //Leaving room
             break;
         case 9:
-            //Rooms
+            edit_rooms(id, fd, ss);
             break;
         case 0:
             logout(id, fd);
@@ -297,7 +531,7 @@ void Server::checkusername(std::string name, int fd)
 void Server::checkCommand(char buff[], int fd)
 {
     std::string command(buff);
-    std::stringstream ss(command);
+    std::istringstream ss(command);
     std::string order, word, str;
     std::getline(ss, order, '/');
     if (order == "signup")

@@ -22,6 +22,12 @@
 #define ERR503 "503: Bad sequence of commands."
 #define DELIM '-'
 
+struct Date {
+    std::string day;
+    std::string month;
+    std::string year;
+};
+
 class Server
 {
 public:
@@ -29,6 +35,8 @@ public:
     void build();
     void signup(std::string username, std::string password, std::string purse, std::string phoneNumber, std::string address, int fd);
     void checkCommand(char buff[], int fd);
+    bool checkDateFormat(const std::string& input);
+    void set_date(std::string day_, std::string month_, std::string year_);
     void checkusername(std::string name, int fd);
     void signin(std::string username, std::string password, int fd);
     int setup_server(int port);
@@ -37,7 +45,9 @@ public:
     void logout(int id, int fd);
     void edit_information(int id, int fd, std::istringstream &ss);
 private:
+    
     readJson data;
+    Date sys_date;
     std::vector<int> loggedInIds;
 };
 

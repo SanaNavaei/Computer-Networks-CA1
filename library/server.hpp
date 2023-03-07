@@ -42,6 +42,7 @@ public:
     int setup_server(int port);
     bool checkIsANumber(std::string input, int fd);
     void action_to_be_done(int choice, int id, int fd, std::istringstream& ss);
+    std::string get_info(int id);
     void logout(int id, int fd);
     void edit_information(int id, int fd, std::istringstream &ss);
 private:

@@ -23,10 +23,12 @@ public:
     int getmax_capacity();
     int getcapacity();
     
+    std::vector<userInRoom> getusers();
+    
     void set_price(int price_);
     void set_maxcap(int maxCapacity_);
-    
-    std::vector<userInRoom> getusers();
+    void set_capacity(int capacity_);
+    void set_userInRooms(std::vector<userInRoom> userInRooms_);
 private:
     std::string number;
     int status;

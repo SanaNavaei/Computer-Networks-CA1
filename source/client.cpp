@@ -252,7 +252,7 @@ void Client::build()
         {
             id = stoi(tokens[1]);
             user_admin = tokens[2];
-            command = user_list(id);
+            command = user_list(id, user_admin);
             if (command == "error" && str != ERR503)
             {
                 std::cout << ERR503 << std::endl;
@@ -267,7 +267,7 @@ void Client::build()
             {
                 id = stoi(tokens[1]);
                 user_admin = tokens[2];
-                command = user_list(id);
+                command = user_list(id, user_admin);
                 if (command == "error" && str != ERR503)
                 {
                     std::cout << ERR503 << std::endl;
@@ -302,7 +302,15 @@ void Client::build()
         while (std::getline(ss, token, '/')){
             tokens.push_back(token);
         }
-        std::cout << tokens[0] << std::endl;
+        if (tokens[0][0] == '#')
+        {
+            std::cout << tokens[0] << std::endl;
+            id = stoi(tokens[1]);
+            user_admin = tokens[2];
+            user_list(id, user_admin);
+        }
+        else
+            std::cout << tokens[0] << std::endl;
     }
 }
 

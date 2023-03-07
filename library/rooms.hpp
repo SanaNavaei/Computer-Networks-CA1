@@ -16,6 +16,12 @@ class Rooms
 {
 public:
     Rooms(std::string number_, int status_, int price_, int maxCapacity_, int capacity_, std::vector<userInRoom> userInRooms_);
+    std::string getnum();
+    int getstatus();
+    int getprice();
+    int getmax_capacity();
+    int getcapacity();
+    std::vector<userInRoom> getusers();
 private:
     std::string number;
     int status;

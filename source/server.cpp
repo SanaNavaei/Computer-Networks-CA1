@@ -76,7 +76,37 @@ void Server::logout(int id, int fd)
         }
     }
 }
+std::string Server::user_info_gathering(int id)
+{
+    std::stringstream ss;
+    ss << "###########################" << std::endl;
+    ss << "all users info:" << std::endl; 
+    for(int i = 0; i < data.users.size(); i++)
+    {
 
+        ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
+        ss << "name: " << data.users[i]->getname() << std::endl;
+        ss << "purse: " << data.users[i]->getPurse() << std::endl;
+        ss << "phoneNumber: " << data.users[i]->getPhoneNumber() << std::endl;
+        ss << "address: " << data.users[i]->getAddress() << std::endl;
+        ss << "###########################" << std::endl;
+    }
+    ss << "/" << id;
+    std::string info;
+    info = ss.str();
+    return info;
+
+}
+
+bool Server::check_if_is_admin(int id)
+{
+    for (int i = 0; i < data.admins.size(); i++)
+    {
+        if (id == data.admins[i]->getid())
+            return true;
+    }
+    return false;
+}
 std::string Server::get_info(int id)
 {
     std::stringstream ss;
@@ -124,9 +154,22 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             send(fd, userORadmin_info.c_str(), userORadmin_info.size(), 0);
             break;
         }
-        case 2:
-            //View all users
+        case 2: //View all users
+        {
+            std::string info;
+            if (check_if_is_admin(id))
+            {
+                info = user_info_gathering(id);
+            }
+            else
+            {
+                std::stringstream ss;
+                ss << ERR403 << std::endl << "/" << id << "/user";
+                info = ss.str();
+            }
+            send(fd, info.c_str(), info.size(), 0);
             break;
+        }
         case 3:
             //View rooms information
             break;

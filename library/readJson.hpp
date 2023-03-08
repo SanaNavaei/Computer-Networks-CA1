@@ -18,6 +18,8 @@ public:
     readJson();
     
     void write_signedup(std::string data);
+    void write_editinfo(std::string data);
+    void write_leaveroom(std::string data);
 
     int getPort();
 

@@ -694,10 +694,12 @@ void Server::signup(std::string username, std::string password, std::string purs
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
+    std::string jsondata = "{\"id\":" + std::to_string(data.users.size()+ data.admins.size()) + ",\"user\":\"" + username + "\",\"password\":\"" + password + "\",\"purse\":\"" + purse + "\",\"phoneNumber\":\"" + phoneNumber + "\",\"address\":\"" + address + "\",\"admin\":\"false\"}";
     data.users.push_back(new User(data.users.size()+ data.admins.size(), username, password, purse, phoneNumber, address));
     
     std::string message = ERR231;
     send(fd, message.c_str(), message.size(), 0);
+    data.write_signedup(jsondata);
 }
 
 void Server::checkusername(std::string name, int fd)

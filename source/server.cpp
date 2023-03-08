@@ -425,7 +425,6 @@ std::string Server::rooms_info_gathering(int id)///
         ss << "/user";
     std::string room_info;
     room_info = ss.str();
-    std::cout << room_info;
     return room_info;
 }
 

@@ -195,11 +195,7 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         }
         std::vector<userInRoom> newusers;
         data.rooms.push_back(new Rooms(RoomNum, 0, stoi(Price), stoi(MaxCapacity), 0, newusers));
-        for(int i = 0; i < data.rooms.size(); i++)
-        {
-            std::cout << data.rooms[i]->getnum() << std::endl;
-        }
-
+        
         //send message to client that room added
         message = ERR104;
         message += "/" + std::to_string(id) + "/admin";
@@ -351,12 +347,6 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
                 data.rooms.erase(data.rooms.begin() + i);
                 break;
             }
-        }
-        for(int i = 0; i < data.rooms.size(); i++)
-        {
-            std::cout << data.rooms[i]->getnum() << std::endl;
-            std::cout << data.rooms[i]->getprice() << std::endl;
-            std::cout << data.rooms[i]->getmax_capacity() << std::endl;
         }
         message = ERR106;
         message += "/" + std::to_string(id) + "/admin";

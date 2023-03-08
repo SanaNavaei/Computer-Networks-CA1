@@ -7,6 +7,21 @@ std::string readJson::getHostName()
 {
     return hostName;
 }
+
+//write signedup user in Userinfo.json
+void readJson::write_signedup(std::string data)
+{
+    std::ifstream user_file("./UserInfo.json");
+
+    json user_data = json::parse(user_file);
+    user_file.close();
+
+    user_data["users"].push_back(json::parse(data));
+    std::ofstream file("./UserInfo.json");
+    file << std::setw(4) << user_data;
+    file.close();
+}
+
 readJson::readJson()
 {
     //Read config.json

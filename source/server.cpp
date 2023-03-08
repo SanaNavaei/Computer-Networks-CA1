@@ -385,6 +385,50 @@ void Server::logout(int id, int fd)
     }
 }
 
+std::string Server::rooms_info_gathering(int id)///
+{
+    std::stringstream ss;
+    bool is_admin = check_if_is_admin(id);
+    ss << "###########################" << std::endl;
+    ss << "rooms info: \n";
+    for (int i = 0; i < data.rooms.size(); i++)
+    {
+        ss << "number: " << data.rooms[i]->getnum() << std::endl;
+        ss << "status: " << data.rooms[i]->getstatus() << std::endl;
+        ss << "price: " << data.rooms[i]->getprice() << std::endl;
+        ss << "maxCapacity: " << data.rooms[i]->getmax_capacity() << std::endl;
+        ss << "capacity: " << data.rooms[i]->getcapacity() << std::endl;
+        if (is_admin)
+        {
+            ss << "------------------------" << std::endl;
+            ss << "users in this room: " << std::endl;
+            bool is_empty = true;
+            for (int j = 0; j < data.rooms[i]->getusers().size(); j++)
+            {
+                is_empty = false;
+                if(j) ss << "------------------------" << std::endl;
+                ss << "user number " << j + 1 << ": " << std::endl;
+                ss << "id: " << data.rooms[i]->getusers()[j].id << std::endl;
+                ss << "number of reserved beds: " << data.rooms[i]->getusers()[j].numOfBeds << std::endl;
+                ss << "from date: " << data.rooms[i]->getusers()[j].reserveDate << std::endl;
+                ss << "to date: " << data.rooms[i]->getusers()[j].checkoutDate << std::endl;
+            }
+            if (is_empty)
+                ss << "this room is empty." << std::endl;
+        }
+        ss << "###########################" << std::endl;
+    }
+    ss << "/" << id;
+    if (is_admin)
+        ss << "/admin";
+    else
+        ss << "/user";
+    std::string room_info;
+    room_info = ss.str();
+    std::cout << room_info;
+    return room_info;
+}
+
 std::string Server::user_info_gathering(int id)
 {
     std::stringstream ss;
@@ -481,9 +525,13 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             send(fd, info.c_str(), info.size(), 0);
             break;
         }
-        case 3:
-            //View rooms information
+        case 3: //View rooms information
+        {
+            std::string rooms_info;
+            rooms_info = rooms_info_gathering(id);
+            send(fd, rooms_info.c_str(), rooms_info.size(), 0);
             break;
+        }
         case 4:
             //Booking
             break;

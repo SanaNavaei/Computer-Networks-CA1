@@ -29,6 +29,7 @@ public:
     void set_maxcap(int maxCapacity_);
     void set_capacity(int capacity_);
     void set_userInRooms(std::vector<userInRoom> userInRooms_);
+    void set_status(int status_);
 private:
     std::string number;
     int status;

@@ -56,6 +56,7 @@ public:
     void edit_rooms(int id, int fd, std::istringstream &ss);
     void leave_room(int id, int fd, std::istringstream &ss);
     void pass_day(int id, int fd, std::istringstream &ss);
+    void handle_pass_day();
 
     std::string get_info(int id);
     std::string user_info_gathering(int id);
@@ -65,6 +66,7 @@ public:
     bool checkIsANumber(std::string input, int fd);
     bool check_if_is_admin(int id);
     bool check_room_exist(std::string room_number);
+    bool compare_date(std::string date);
 private:
     
     readJson data;

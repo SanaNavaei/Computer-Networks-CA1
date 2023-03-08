@@ -58,6 +58,7 @@ public:
 
     std::string get_info(int id);
     std::string user_info_gathering(int id);
+    std::string rooms_info_gathering(int id);
 
     bool checkDateFormat(const std::string& input);
     bool checkIsANumber(std::string input, int fd);

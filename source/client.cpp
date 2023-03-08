@@ -49,7 +49,7 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             if (passDay != "passDay")
                 return "error";
             std::getline(ss, value, ' ');
-            return "menu/6/" + std::to_string(id) + "/" + value + "/" + user_admin;;
+            return "menu/6/" + std::to_string(id) + "/" + value + "/" + user_admin;
         }   
         case 7:{
             std::string password, phone, address;
@@ -67,7 +67,7 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::cin >> phone;
                 std::cout << "address" << std::endl;
                 std::cin >> address;
-                return "menu/7/" + std::to_string(id) + "/" + roomOrCapacity + "/" + password + "/" + phone + "/" + address;
+                return "menu/7/" + std::to_string(id) + "/" + password + "/" + phone + "/" + address;
             }
         }
         case 8:{
@@ -85,7 +85,7 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             if (user_admin == "admin" && (roomOrCapacity != "room" && roomOrCapacity != "capacity"))
                 return "error";
             std::getline(ss, value, ' ');
-            return "menu/8/" + std::to_string(id) + "/" + value;
+            return "menu/8/" + std::to_string(id) + "/" + roomOrCapacity + "/" + value;
         }
         case 9:{
             if(user_admin == "user")

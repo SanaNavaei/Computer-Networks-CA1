@@ -55,6 +55,7 @@ public:
     void edit_information(int id, int fd, std::istringstream &ss);
     void edit_rooms(int id, int fd, std::istringstream &ss);
     void leave_room(int id, int fd, std::istringstream &ss);
+    void pass_day(int id, int fd, std::istringstream &ss);
 
     std::string get_info(int id);
     std::string user_info_gathering(int id);

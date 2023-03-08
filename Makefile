@@ -23,7 +23,7 @@ admin.o: source/admin.cpp library/admin.hpp
 readJson.o: source/readJson.cpp library/readJson.hpp library/json.hpp library/user.hpp library/admin.hpp
 	$(CC) -c $< -o $@
 
-rooms.o: source/rooms.cpp library/rooms.hpp
+rooms.o: source/rooms.cpp library/rooms.hpp library/readJson.hpp
 	$(CC) -c $< -o $@
 
 .PHONY: clean

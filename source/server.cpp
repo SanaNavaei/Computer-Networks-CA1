@@ -9,6 +9,98 @@ void Server::set_date(std::string day_, std::string month_, std::string year_)
     sys_date.year = year_;
 }
 
+void Server::pass_day(int id, int fd, std::istringstream& ss)
+{
+    std::string message;
+    std::string value;
+    std::getline(ss, value, '/'); //value
+
+    //check if value is empty
+    if (value.empty())
+    {
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "User id: " << id << " tried to pass day." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+
+    //check if value is a number
+    if (checkIsANumber(value, fd) == false)
+    {
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "User id: " << id << " tried to pass day." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+    int day = std::stoi(value);
+
+    //check if value is positive
+    if (day <= 0)
+    {
+        message = ERR401;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "User id: " << id << " tried to pass day." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+
+    int day_ = std::stoi(sys_date.day);
+    int month_ = std::stoi(sys_date.month);
+    int year_ = std::stoi(sys_date.year);
+    day_ += day;
+    if (month_ == 1 || month_ == 3 || month_ == 5 || month_ == 7 || month_ == 8 || month_ == 10 || month_ == 12)
+    {
+        if (day_ > 31)
+        {
+            month_++;
+            day_ -= 31;
+        }
+    }
+    else if (month_ == 4 || month_ == 6 || month_ == 9 || month_ == 11)
+    {
+        if (day_ > 30)
+        {
+            month_++;
+            day_ -= 30;
+        }
+    }
+    else if (month_ == 2)
+    {
+        if (year_ % 4 == 0)
+        {
+            if (day_ > 29)
+            {
+                month_++;
+                day_ -= 29;
+            }
+        }
+        else
+        {
+            if (day_ > 28)
+            {
+                month_++;
+                day_ -= 28;
+            }
+        }
+    }
+    if (month_ > 12)
+    {
+        year_++;
+        month_ -= 12;
+    }
+    sys_date.day = std::to_string(day_);
+    sys_date.month = std::to_string(month_);
+    sys_date.year = std::to_string(year_);
+    message = ERR312;
+    message += "/" + std::to_string(id) + "/admin";
+    std::cout << "Admin id: " << id << " passed " << day << " days." << std::endl;
+    std::cout << "Date: " << sys_date.day << "-" << sys_date.month << "-" << sys_date.year << std::endl;
+    send(fd, message.c_str(), message.size(), 0);
+    return;
+}
+
 void Server::edit_information(int id, int fd, std::istringstream& ss)
 {
     std::string message;
@@ -138,7 +230,6 @@ void Server::leave_room(int id, int fd, std::istringstream& ss)
         return;
     }
 }
-
 
 bool Server::check_room_exist(std::string room_number)
 {
@@ -528,7 +619,7 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             //Canceling
             break;
         case 6:
-            //pass day
+            pass_day(id, fd, ss);
             break;
         case 7:
             edit_information(id, fd, ss);

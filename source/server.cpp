@@ -9,6 +9,62 @@ void Server::set_date(std::string day_, std::string month_, std::string year_)
     sys_date.year = year_;
 }
 
+bool Server::compare_date(std::string date)
+{
+    std::string day = date.substr(0, 2);
+    std::string month = date.substr(3, 2);
+    std::string year = date.substr(6, 4);
+    
+    //comapre year
+    if (std::stoi(year) > std::stoi(sys_date.year))
+        return true;
+    else if (std::stoi(year) < std::stoi(sys_date.year))
+        return false;
+    
+    //compare month
+    if (std::stoi(month) > std::stoi(sys_date.month))
+        return true;
+    else if (std::stoi(month) < std::stoi(sys_date.month))
+        return false;
+
+    //compare day
+    if (std::stoi(day) > std::stoi(sys_date.day))
+        return true;
+    else if (std::stoi(day) < std::stoi(sys_date.day))
+        return false;
+    
+    return false;
+}
+
+void Server::handle_pass_day()
+{
+    //check all rooms reservation to see if they are expired
+    for (auto& room : data.rooms)
+    {
+        std::vector<int> deleted_index = {};
+        std::vector<userInRoom> users = room->getusers();
+        for(int i = 0; i < users.size(); i++)
+        {
+            //if reservation is expired
+            if (compare_date(users[i].checkoutDate) == false)
+            {
+                room->set_capacity(room->getcapacity() + users[i].numOfBeds);
+                if(room->getstatus() == 1)
+                    room->set_status(0);
+                deleted_index.push_back(i);
+                std::string jsondata = "{\"id\":" + std::to_string(users[i].id) + ",\"number\":\"" + room->getnum() + 
+                                        "\",\"capacity\":" + std::to_string(room->getcapacity()) + 
+                                        ",\"status\":" + std::to_string(room->getstatus()) + "}";
+                data.write_leaveroom(jsondata);
+            }
+        }
+        //delete expired reservation
+        for (int i = 0; i < deleted_index.size(); i++)
+            users.erase(users.begin() + deleted_index[i]);
+        room->set_userInRooms(users);  
+    }
+}
+
 void Server::pass_day(int id, int fd, std::istringstream& ss)
 {
     std::string message;
@@ -97,6 +153,7 @@ void Server::pass_day(int id, int fd, std::istringstream& ss)
     message += "/" + std::to_string(id) + "/admin";
     std::cout << "Admin id: " << id << " passed " << day << " days." << std::endl;
     std::cout << "Date: " << sys_date.day << "-" << sys_date.month << "-" << sys_date.year << std::endl;
+    handle_pass_day();
     send(fd, message.c_str(), message.size(), 0);
     return;
 }
@@ -126,7 +183,10 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
             message = ERR312;
             message += "/" + std::to_string(data.users[i]->getid()) + "/user";
             std::cout << "User id: " << id << " edited information." << std::endl;
+            
+            std::string jsondata = "{\"id\":" + std::to_string(id) + ",\"password\":\"" + password + "\",\"phoneNumber\":\"" + phone + "\",\"address\":\"" + address + "\",\"admin\":\"false\"}";
             send(fd, message.c_str(), message.size(), 0);
+            data.write_editinfo(jsondata);
             return;
         }
     }
@@ -148,7 +208,9 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
             message = ERR312;
             message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
             std::cout << "Admin id: " << id << " edited information." << std::endl;
+            std::string jsondata = "{\"id\":" + std::to_string(id) + ",\"password\":\"" + password + "\",\"admin\":\"true\"}";
             send(fd, message.c_str(), message.size(), 0);
+            data.write_editinfo(jsondata);
             return;
         }
     }
@@ -199,16 +261,32 @@ void Server::leave_room(int id, int fd, std::istringstream& ss)
                 {
                     if (usersExists[j].id == id) //check if user exist in room
                     {
+                        //error if user leave room before reserve date
+                        if(compare_date(usersExists[j].reserveDate) == true)
+                        {
+                            message = ERR503;
+                            message += "/" + std::to_string(id) + "/" + user_admin;
+                            std::cout << "User id: " << id << " tried to leave room." << std::endl;
+                            send(fd, message.c_str(), message.size(), 0);
+                            return;
+                        }
+                        if (compare_date(usersExists[j].reserveDate) == false && compare_date(usersExists[j].checkoutDate) == true)
+                        {
+                            data.rooms[i]->set_capacity(data.rooms[i]->getcapacity() + usersExists[j].numOfBeds);
+                            if(data.rooms[i]->getstatus() == 1)
+                                data.rooms[i]->set_status(0);
+                        }
                         usersExists.erase(usersExists.begin() + j);
-                        data.rooms[i]->set_capacity(data.rooms[i]->getcapacity() + 1);
-                        if(data.rooms[i]->getcapacity() == 1)
-                            data.rooms[i]->set_capacity(0);
                         //set new userexist vector in room
                         data.rooms[i]->set_userInRooms(usersExists);
+                        std:: string jsondata = "{\"id\":" + std::to_string(id) + ",\"number\":\"" + value + 
+                                                "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + 
+                                                ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + ",\"admin\":\"false\"}";  
                         message = ERR413;
                         message += "/" + std::to_string(id) + "/" + user_admin;
                         std::cout << "User id: " << id << " left room." << std::endl;
                         send(fd, message.c_str(), message.size(), 0);
+                        data.write_leaveroom(jsondata);
                         return;
                     }
                 }

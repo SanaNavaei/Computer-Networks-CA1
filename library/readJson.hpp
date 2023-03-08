@@ -16,11 +16,16 @@ class readJson
 {
 public:
     readJson();
+    
+    void write_signedup(std::string data);
+
+    int getPort();
+
+    std::string getHostName(); 
+    
     std::vector<User*> users;
     std::vector<Admin*> admins;
     std::vector<Rooms*> rooms;
-    int getPort();
-    std::string getHostName();
 private:
     std::string hostName;
     int port;

@@ -111,3 +111,18 @@ void Rooms::set_userInRooms(std::vector<userInRoom> userInRooms_)
 {
     userInRooms = userInRooms_;
 }
+
+void Rooms::set_capacity(int capacity_)
+{
+    capacity = capacity_;
+}
+
+void Rooms::set_userInRooms(std::vector<userInRoom> userInRooms_)
+{
+    userInRooms = userInRooms_;
+}
+
+void Rooms::set_status(int status_)
+{
+    status = status_;
+}

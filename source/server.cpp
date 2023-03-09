@@ -570,6 +570,97 @@ void Server::logout(int id, int fd)
     }
 }
 
+std::string Server::cancel(int id, std::istringstream& ss)
+{
+    std::stringstream ss2;
+    std::string room_num, n_person;
+    std::getline(ss, room_num, '/');
+    std::getline(ss, n_person, '/');
+
+    //check if there is empty field
+    if (room_num == "" || n_person == "")
+    {
+        ss2 << ERR401 << std::endl << "/" << id << "/user";
+        return ss2.str();
+    }
+
+    //check if the fields are numbers
+    if (checkIsANumber(room_num, 0) == false || checkIsANumber(n_person, 0) == false)
+    {
+        ss2 << ERR401 << std::endl << "/" << id << "/user";
+        return ss2.str();
+    }
+    
+    for (int i = 0; i < data.rooms.size(); i++)
+    {
+        if (data.rooms[i]->getnum() == room_num)
+        {
+            int cost = data.rooms[i]->getprice();
+            int cost_back = cost * stoi(n_person) / 2;
+            for (int j = 0; j < data.rooms[i]->getusers().size(); j++)
+            {
+                if (data.rooms[i]->getusers()[j].id == id)
+                {
+                    if (data.rooms[i]->getusers()[j].numOfBeds < stoi(n_person))
+                    {
+                        //over limit...
+                        ss2 << ERR102 << std::endl << "/" << id << "/user";
+                        return ss2.str();
+                    }
+                    else
+                    {
+                        //cash back and delete reservation
+                        for (int k = 0; k < data.users.size(); k++)
+                        {
+                            if (data.users[k]->getid() == id)
+                            {
+                                data.users[k]->cash_back(cost_back);
+                            }
+                        }
+                        data.rooms[i]->del_reservation(j);
+                        ss2 << ERR110 << std::endl << "/" << id << "/user";
+                        return ss2.str();
+                    }
+                }
+            }
+            //no reservation found 
+            ss2 << ERR102 << std::endl << "/" << id << "/user";
+            return ss2.str();
+
+        }
+    }
+    //the room not found...
+    ss2 << ERR101 << std::endl << "/" << id << "/user";
+    return ss2.str();
+}
+
+std::string Server::get_all_reservations(int id)
+{
+    int count = 1;
+    std::stringstream ss;
+    for (int i = 0; i < data.rooms.size(); i++)
+    {
+        for (int j = 0; j < data.rooms[i]->getusers().size(); j++)
+        {
+            if (data.rooms[i]->getusers()[j].id == id)
+            {
+                ss << "reservation number " << count << ":" << std::endl;
+                ss << "room number: " << data.rooms[i]->getnum() << std::endl;
+                ss << "number of reserved beds: " << data.rooms[i]->getusers()[j].numOfBeds << std::endl;
+                ss << "from " << data.rooms[i]->getusers()[j].reserveDate << " to " << data.rooms[i]->getusers()[j].checkoutDate << std::endl;
+                count++;
+            }
+        }
+    }
+    if (count == 1)
+    {
+        ss << "no reservations yet!" << std::endl;
+    }
+    ss << "/" << id << "/user" << "/#";
+    return ss.str();
+
+}
+
 bool check_interference(std::string from, std::string to, std::string from_, std::string to_)///
 {
     // Convert the start and end dates to tm structs
@@ -848,9 +939,20 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             send(fd, message.c_str(), message.size(), 0);
             break;
         }
-        case 5:
-            //Canceling
+        case 5: //Canceling
+        {
+            std::string reservation_info;
+            reservation_info = get_all_reservations(id);
+            send(fd, reservation_info.c_str(), reservation_info.size(), 0);
             break;
+        }
+        case 55:
+        {
+            std::string message;
+            message = cancel(id, ss);
+            send(fd, message.c_str(), message.size(), 0);
+            break;
+        }
         case 6:
             pass_day(id, fd, ss);
             break;

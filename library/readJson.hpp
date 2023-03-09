@@ -20,6 +20,11 @@ public:
     void write_signedup(std::string data);
     void write_editinfo(std::string data);
     void write_leaveroom(std::string data);
+    void write_addroom(std::string data);
+    void write_modifiedroom(std::string data);
+    void write_deleteroom(std::string data);
+    void write_booking(std::string data);
+    void write_purse(std::string data);
 
     int getPort();
 

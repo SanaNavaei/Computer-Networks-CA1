@@ -29,6 +29,8 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             return "menu/4/" + std::to_string(id) + "/" + RoomNum + "/" + NumOfBeds + "/" + CheckInDate + "/" + CheckOutDate;
         }
         case 5:{
+            if (user_admin != "user")
+                return "error403";
             std::cout << "cancel <RoomNum> <Num>" << std::endl;
             std::string command, RoomNum, Num, cancel;
             std::getline(std::cin >> std::ws, command);
@@ -38,7 +40,7 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 return "error";
             std::getline(ss, RoomNum, ' ');
             std::getline (ss, Num, ' ');
-            return "menu/5/" + std::to_string(id) + "/" + RoomNum + "/" + Num;
+            return "menu/55/" + std::to_string(id) + "/" + RoomNum + "/" + Num;
         }
         case 6:{
             if(user_admin != "admin")
@@ -166,6 +168,12 @@ std::string user_list(int id, std::string user_admin)
         }
         else
         {
+            if (stoi(choice_num) == 5)
+            {
+                if (user_admin != "user")
+                    return "error403";
+                return "menu/5/" + std::to_string(id);
+            }
             return action_sentences(stoi(choice_num),id, user_admin);
         }
     }
@@ -285,7 +293,12 @@ void Client::build()
             {
                 id = stoi(tokens[1]);
                 user_admin = tokens[2];
-                command = user_list(id, user_admin);
+                if (tokens.size() == 4 && tokens[3] == "#")
+                {
+                    command = action_sentences(5, id, user_admin);
+                }
+                else
+                    command = user_list(id, user_admin);
                 if (command == "error" && str != ERR503)
                 {
                     std::cout << ERR503 << std::endl;

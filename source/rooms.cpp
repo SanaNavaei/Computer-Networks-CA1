@@ -126,3 +126,18 @@ void Rooms::set_status(int status_)
 {
     status = status_;
 }
+
+void Rooms::add_user(int id_, std::string numOfBeds_, std::string reserveDate_, std::string checkoutDate_)
+{
+    userInRoom new_user;
+    new_user.id = id_;
+    new_user.numOfBeds = stoi(numOfBeds_);
+    new_user.reserveDate = reserveDate_;
+    new_user.checkoutDate = checkoutDate_;
+    userInRooms.push_back(new_user);
+}
+
+void Rooms::change_capacity(int reduce_by)
+{
+    capacity -= reduce_by;
+}

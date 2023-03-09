@@ -544,6 +544,119 @@ void Server::logout(int id, int fd)
     }
 }
 
+bool check_interference(std::string from, std::string to, std::string from_, std::string to_)///
+{
+    // Convert the start and end dates to tm structs
+    tm start1 = { 0 };
+    strptime(from.c_str(), "%m-%d-%Y", &start1);
+    tm end1 = { 0 };
+    strptime(to.c_str(), "%m-%d-%Y", &end1);
+    tm start2 = { 0 };
+    strptime(from_.c_str(), "%m-%d-%Y", &start2);
+    tm end2 = { 0 };
+    strptime(to.c_str(), "%m-%d-%Y", &end2);
+
+    // Convert tm structs to time_t
+    time_t start1_time = mktime(&start1);
+    time_t end1_time = mktime(&end1);
+    time_t start2_time = mktime(&start2);
+    time_t end2_time = mktime(&end2);
+
+    // Check for overlap
+    if (end1_time < start2_time || end2_time < start1_time) {
+        //no overlap
+        return false;
+    }
+    else {
+        //overlap
+        return true;
+    }
+}
+
+std::string Server::book(int id, std::istringstream& ss)
+{
+    std::stringstream ss2;
+    std::string room_num, num_of_beds, check_in_date, check_out_date;
+    std::getline(ss, room_num, '/');
+    std::getline(ss, num_of_beds, '/');
+    std::getline(ss, check_in_date, '/');
+    std::getline(ss, check_out_date, '/');
+
+    //check if there is empty field
+    if (room_num == "" || num_of_beds == "" || check_in_date == "" || check_out_date == "")
+    {
+        ss2 << ERR503 << std::endl << "/" << id << "/user";
+        return ss2.str();
+    }
+
+    //check if the fields are numbers
+    if (checkIsANumber(room_num, 0) == false || checkIsANumber(num_of_beds, 0) == false || checkDateFormat(check_in_date) == false || checkDateFormat(check_out_date) == false)
+    {
+        ss2 << ERR503 << std::endl << "/" << id << "/user";
+        return ss2.str();
+    }
+
+    for (int i = 0; i < data.users.size(); i++)
+    {
+        if (id == data.users[i]->getid())
+        {
+            int purse = stoi(data.users[i]->getpurse());
+            for (int j = 0; j < data.rooms.size(); j++)
+            {
+                if (data.rooms[j]->getnum() == room_num)
+                {
+                    int room_price_per_person = data.rooms[j]->getprice();
+                    int cost = stoi(num_of_beds) * room_price_per_person;
+                    if (cost > purse)
+                    {
+                        ss2 << ERR108 << std::endl << "/" << id << "/user";
+                        return ss2.str();
+                    }
+                    else
+                    {
+                        //check if has space ...
+                        bool no_space = false;
+                        int capacity = data.rooms[j]->getmax_capacity();
+                        if (stoi(num_of_beds) > capacity)
+                        {
+                            no_space = true;
+                        }
+                        //check if have interference
+                        for (int k = 0; k < data.rooms[j]->getusers().size(); k++)
+                        {
+                            std::string from = data.rooms[j]->getusers()[k].reserveDate;
+                            std::string to = data.rooms[j]->getusers()[k].checkoutDate;
+                            no_space = check_interference(from, to, check_in_date, check_out_date);
+                        }
+                        if (no_space)
+                        {
+                            ss2 << ERR109 << std::endl << "/" << id << "/user";
+                            return ss2.str();
+                        }
+                        else
+                        {
+                            //change the capacity of the room and add the reservation and reduce the purse of user
+                            //capacity change just if the duration of this reservation is now!
+                            //what if the date is for before the sys time???
+                            data.rooms[j]->add_user(id, num_of_beds, check_in_date, check_out_date);
+                            data.users[i]->setpurse(std::to_string(purse - cost));
+                            int not_started = compare_date(check_in_date);
+                            if (!not_started)//if true no change in capacity... else change the capacity..
+                                data.rooms[j]->change_capacity(stoi(num_of_beds));
+                            ss2 << "successfully being reserved!" << std::endl << "/" << id << "/user";
+                            return ss2.str();
+                        }
+                    }
+                }
+            }
+            //the room not found...
+            ss2 << ERR101 << std::endl << "/" << id << "/user";
+            return ss2.str();
+        }
+    }
+    return "";
+}
+
 std::string Server::rooms_info_gathering(int id)///
 {
     std::stringstream ss;
@@ -690,9 +803,22 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
             send(fd, rooms_info.c_str(), rooms_info.size(), 0);
             break;
         }
-        case 4:
-            //Booking
+        case 4: //Booking
+        {
+            std::string message;
+            if (check_if_is_admin(id))
+            {
+                std::stringstream ss;
+                ss << ERR403 << std::endl << "/" << id << "/admin";
+                message = ss.str();
+            }
+            else
+            {
+                message = book(id, ss);
+            }
+            send(fd, message.c_str(), message.size(), 0);
             break;
+        }
         case 5:
             //Canceling
             break;

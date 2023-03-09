@@ -54,3 +54,8 @@ void User::setphoneNumber(std::string phoneNumber_)
 {
     phoneNumber = phoneNumber_;
 }
+
+void User::setpurse(std::string purse_)
+{
+    purse = purse_;
+}

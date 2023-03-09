@@ -79,3 +79,8 @@ void Rooms::change_capacity(int reduce_by)
 {
     capacity -= reduce_by;
 }
+
+void Rooms::del_reservation(int index)
+{
+    userInRooms.erase(userInRooms.begin() + index);
+}

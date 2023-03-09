@@ -146,6 +146,14 @@ void Server::pass_day(int id, int fd, std::istringstream& ss)
         year_++;
         month_ -= 12;
     }
+    if(day_ < 10)
+        sys_date.day = "0" + std::to_string(day_);
+    else
+        sys_date.day = std::to_string(day_);
+    if(month_ < 10)
+        sys_date.month = "0" + std::to_string(month_);
+    else
+        sys_date.month = std::to_string(month_);
     sys_date.day = std::to_string(day_);
     sys_date.month = std::to_string(month_);
     sys_date.year = std::to_string(year_);
@@ -369,7 +377,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         message = ERR104;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "Admin id: " << id << " added room." << std::endl;
+        std::string jsondata = "{\"number\":\"" + RoomNum + "\",\"capacity\":" + MaxCapacity + 
+                                ",\"maxCapacity\":" + MaxCapacity + ",\"price\":" + Price + ",\"status\":0,\"users\":[]}";
         send(fd, message.c_str(), message.size(), 0);
+        data.write_addroom(jsondata);
         return; 
     }
     else if(command == "modify")
@@ -442,19 +453,32 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         }
         
         //modify the room
+        int newCapacity, status = 0;
         for(int i = 0; i < data.rooms.size(); i++)
         {
             if (data.rooms[i]->getnum() == RoomNum)
             {
+                int numOfUSers = data.rooms[i]->getmax_capacity() - data.rooms[i]->getcapacity();
                 data.rooms[i]->set_price(stoi(newPrice));
                 data.rooms[i]->set_maxcap(stoi(newMaxCapacity));
+                newCapacity = stoi(newMaxCapacity) - numOfUSers;
+                data.rooms[i]->set_capacity(newCapacity);
+                if(newCapacity == 0)
+                {
+                    data.rooms[i]->set_status(1);
+                    status = 1;
+                }
                 break;
             }
         }
         message = ERR105;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "Admin id: " << id << " modified room." << std::endl;
+        std::string jsondata = "{\"number\":\"" + RoomNum + "\",\"capacity\":" + std::to_string(newCapacity) + 
+                                ",\"maxCapacity\":" + newMaxCapacity + ",\"price\":" + newPrice + 
+                                ",\"status\":" + std::to_string(status) + "}";
         send(fd, message.c_str(), message.size(), 0);
+        data.write_modifiedroom(jsondata);
         return;
     }
     else if(command == "remove")
@@ -520,7 +544,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         message = ERR106;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "Admin id: " << id << " removed room." << std::endl;
+        std::string jsondata = "{\"number\":\"" + RoomNum + "\"}";
         send(fd, message.c_str(), message.size(), 0);
+        data.write_deleteroom(jsondata);
         return;
     }
     else
@@ -640,6 +666,8 @@ std::string Server::book(int id, std::istringstream& ss)
                             //what if the date is for before the sys time???
                             data.rooms[j]->add_user(id, num_of_beds, check_in_date, check_out_date);
                             data.users[i]->setpurse(std::to_string(purse - cost));
+                            std::string jsonpurse = "{\"purse\":\"" + std::to_string(purse - cost) + "\",\"id\":" + std::to_string(id) + "}";
+                            data.write_purse(jsonpurse);
                             int not_started = compare_date(check_in_date);
                             if (!not_started)//if true no change in capacity... else change the capacity..
                             {
@@ -647,6 +675,13 @@ std::string Server::book(int id, std::istringstream& ss)
                                 data.rooms[j]->set_status(1);
                             }
                             ss2 << "successfully being reserved!" << std::endl << "/" << id << "/user";
+                            std::cout << "User id: " << id << " reserved room number: " << room_num << std::endl;
+                            std::string json_userdata = "{\"id\":" + std::to_string(id) + ",\"numOfBeds\":" + 
+                                                    num_of_beds + ",\"reserveDate\":\"" + check_in_date + "\",\"checkoutDate\":\"" + 
+                                                    check_out_date + "\"}";
+                            std::string jsondata = "{\"number\":\"" + room_num + "\",\"status\":" + std::to_string(data.rooms[j]->getstatus()) + 
+                                                    ",\"capacity\":" + std::to_string(data.rooms[j]->getcapacity()) + ",\"users\":" + json_userdata + "}";
+                            data.write_booking(jsondata);
                             return ss2.str();
                         }
                     }
@@ -809,16 +844,7 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
         case 4: //Booking
         {
             std::string message;
-            if (check_if_is_admin(id))
-            {
-                std::stringstream ss;
-                ss << ERR403 << std::endl << "/" << id << "/admin";
-                message = ss.str();
-            }
-            else
-            {
-                message = book(id, ss);
-            }
+            message = book(id, ss);
             send(fd, message.c_str(), message.size(), 0);
             break;
         }

@@ -13,6 +13,8 @@ std::string action_sentences(int choice, int id, std::string user_admin)
         case 3:
             return "menu/3/" + std::to_string(id);
         case 4:{
+            if(user_admin != "user")
+                return "error403";
             std::cout << "book <RoomNum> <NumOfBeds> <CheckInDate> <CheckOutDate>" << std::endl;
             std::string command, RoomNum, NumOfBeds, CheckInDate, CheckOutDate, book;
             std::getline(std::cin >> std::ws, command);

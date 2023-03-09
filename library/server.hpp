@@ -16,6 +16,7 @@
 #define ERR104 "104: Successfully added."
 #define ERR105 "105: Successfully modified."
 #define ERR106 "106: Successfully deleted."
+#define ERR108 "108: Your account balance is not enough."
 #define ERR109 "109: The room capacity is full."
 #define ERR111 "111: This room already exists."
 #define ERR201 "201: User logged out successfully."
@@ -61,6 +62,7 @@ public:
     std::string get_info(int id);
     std::string user_info_gathering(int id);
     std::string rooms_info_gathering(int id);
+    std::string book(int id, std::istringstream& ss);
 
     bool checkDateFormat(const std::string& input);
     bool checkIsANumber(std::string input, int fd);

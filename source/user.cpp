@@ -59,3 +59,8 @@ void User::setpurse(std::string purse_)
 {
     purse = purse_;
 }
+
+void User::cash_back(int cash)
+{
+    purse += cash;
+}

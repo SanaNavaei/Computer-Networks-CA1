@@ -18,6 +18,7 @@ public:
     void setaddress(std::string address_);
     void setphoneNumber(std::string phoneNumber_);
     void setpurse(std::string purse_);
+    void cash_back(int cash);
     
     int getid();
 private:

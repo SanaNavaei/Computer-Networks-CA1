@@ -30,6 +30,9 @@ public:
     void set_capacity(int capacity_);
     void set_userInRooms(std::vector<userInRoom> userInRooms_);
     void set_status(int status_);
+    void add_user(int id_, std::string numOfBeds_, std::string reserveDate_, std::string checkoutDate_);
+    void change_capacity(int reduce_by);
+    
 private:
     std::string number;
     int status;

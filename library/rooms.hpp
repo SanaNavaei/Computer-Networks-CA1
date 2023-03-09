@@ -32,6 +32,7 @@ public:
     void set_status(int status_);
     void add_user(int id_, std::string numOfBeds_, std::string reserveDate_, std::string checkoutDate_);
     void change_capacity(int reduce_by);
+    void del_reservation(int index);
     
 private:
     std::string number;

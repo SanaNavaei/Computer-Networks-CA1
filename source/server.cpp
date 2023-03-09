@@ -642,7 +642,10 @@ std::string Server::book(int id, std::istringstream& ss)
                             data.users[i]->setpurse(std::to_string(purse - cost));
                             int not_started = compare_date(check_in_date);
                             if (!not_started)//if true no change in capacity... else change the capacity..
+                            {
                                 data.rooms[j]->change_capacity(stoi(num_of_beds));
+                                data.rooms[j]->set_status(1);
+                            }
                             ss2 << "successfully being reserved!" << std::endl << "/" << id << "/user";
                             return ss2.str();
                         }

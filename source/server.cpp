@@ -605,6 +605,7 @@ std::string Server::cancel(int id, std::istringstream& ss)
                     {
                         //over limit...
                         ss2 << ERR102 << std::endl << "/" << id << "/user";
+                        std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
                         return ss2.str();
                     }
                     else
@@ -615,22 +616,47 @@ std::string Server::cancel(int id, std::istringstream& ss)
                             if (data.users[k]->getid() == id)
                             {
                                 data.users[k]->cash_back(cost_back);
+                                std::string jsoncash = "{\"id\":" + std::to_string(id) + ",\"purse\":\"" + data.users[k]->getpurse() + "\"}";
+                                data.write_purse(jsoncash);
                             }
                         }
-                        data.rooms[i]->del_reservation(j);
-                        ss2 << ERR110 << std::endl << "/" << id << "/user";
-                        return ss2.str();
+                        
+                        //check if the n_person is equal to the number of beds
+                        if (data.rooms[i]->getusers()[j].numOfBeds == stoi(n_person))
+                        {
+                            data.rooms[i]->del_reservation(j);
+                            std::cout << "User id: " << id << " canceled reservation." << std::endl;
+                            std::string usrjson = "{\"id\":" + std::to_string(id) + ",\"number\":\"" + room_num + 
+                                                    "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + "}";
+                            data.write_cancel(usrjson);
+                            ss2 << ERR110 << std::endl << "/" << id << "/user";
+                            return ss2.str();
+                        }
+                        else
+                        {
+                            int num = data.rooms[i]->getusers()[j].numOfBeds;
+                            data.rooms[i]->set_numOfBeds(j, num - stoi(n_person));
+                            std::cout << "User id: " << id << " canceled reservation." << std::endl;
+                            std::string usrjson = "{\"id\":" + std::to_string(id) + ",\"numOfBeds\":" + std::to_string(data.rooms[i]->get_numOfBeds(j))+ 
+                                                    ",\"number\":\"" + room_num + "\",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + ",\"capacity\":" + 
+                                                    std::to_string(data.rooms[i]->getcapacity()) + "}";
+                            ss2 << ERR110 << std::endl << "/" << id << "/user";
+                            data.write_numOfbeds(usrjson);
+                            return ss2.str();
+                        }
                     }
                 }
             }
             //no reservation found 
             ss2 << ERR102 << std::endl << "/" << id << "/user";
+            std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
             return ss2.str();
 
         }
     }
     //the room not found...
     ss2 << ERR101 << std::endl << "/" << id << "/user";
+    std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
     return ss2.str();
 }
 
@@ -657,6 +683,7 @@ std::string Server::get_all_reservations(int id)
         ss << "no reservations yet!" << std::endl;
     }
     ss << "/" << id << "/user" << "/#";
+    std::cout << "User id: " << id << " got all reservations." << std::endl;
     return ss.str();
 
 }
@@ -1183,7 +1210,7 @@ void Server::build()
 {
     fd_set master_set, working_set;
     int server_fd;
-    char buffer[1024] = {0};
+    char buffer[5000] = {0};
     server_fd = setup_server(data.getPort());
     if (server_fd < 0)
     {
@@ -1239,8 +1266,8 @@ void Server::build()
                 }
                 else //client is sending a message
                 {
-                    memset(buffer, 0, 1024);
-                    int bytes_recieved = recv(i, buffer, 1024, 0);
+                    memset(buffer, 0, 5000);
+                    int bytes_recieved = recv(i, buffer, 5000, 0);
                     if(bytes_recieved == 0)
                     {
                         std::cout << "client disconnected." << std::endl;

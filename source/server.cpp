@@ -743,7 +743,7 @@ std::string Server::book(int id, std::istringstream& ss)
     }
 
     //check if the fields are numbers
-    if (checkIsANumber(room_num, 0) == false || checkIsANumber(num_of_beds, 0) == false || checkDateFormat(check_in_date) == false || checkDateFormat(check_out_date) == false)
+    if (checkIsANumber(room_num, 0) == false || checkIsANumber(num_of_beds, 0) == false || checkDateFormat(check_in_date, false) == false || checkDateFormat(check_out_date, false) == false)
     {
         ss2 << ERR503 << std::endl << "/" << id << "/user";
         return ss2.str();
@@ -1168,7 +1168,7 @@ void Server::checkCommand(char buff[], int fd)
     }
 }
 
-bool Server::checkDateFormat(const std::string& input) {
+bool Server::checkDateFormat(const std::string& input, bool set_needed) {
     std::stringstream ss(input);
     std::string day, month, year;
     
@@ -1191,7 +1191,8 @@ bool Server::checkDateFormat(const std::string& input) {
         return false;
     if(year.size() != 4)
         return false;
-    set_date(day, month, year);
+    if(set_needed)
+        set_date(day, month, year);
     return true;
 }
 
@@ -1254,7 +1255,7 @@ void Server::build()
     }
     std::string date;
     ss >> date;
-    if (!checkDateFormat(date))
+    if (!checkDateFormat(date, true))
     {
         std::cout << ERR401 << std::endl;
         exit(EXIT_FAILURE);

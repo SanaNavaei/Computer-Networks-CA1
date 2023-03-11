@@ -67,7 +67,7 @@ public:
     std::string cancel(int id, std::istringstream& ss);
     std::string get_all_reservations(int id);
 
-    bool checkDateFormat(const std::string& input);
+    bool checkDateFormat(const std::string& input, bool set_needed);
     bool checkIsANumber(std::string input, int fd);
     bool check_if_is_admin(int id);
     bool check_room_exist(std::string room_number);

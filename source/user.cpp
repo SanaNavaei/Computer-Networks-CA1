@@ -62,5 +62,7 @@ void User::setpurse(std::string purse_)
 
 void User::cash_back(int cash)
 {
-    purse += cash;
+    int purse_int = std::stoi(purse);
+    purse_int += cash;
+    purse = std::to_string(purse_int);
 }

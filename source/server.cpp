@@ -779,7 +779,17 @@ std::string Server::book(int id, std::istringstream& ss)
                         {
                             std::string from = data.rooms[j]->getusers()[k].reserveDate;
                             std::string to = data.rooms[j]->getusers()[k].checkoutDate;
-                            no_space = check_interference(from, to, check_in_date, check_out_date);
+                            int same_date = check_interference(from, to, check_in_date, check_out_date);
+                            if(same_date)
+                            {
+                                int n_reserved_bed = data.rooms[j]->getusers()[k].numOfBeds;
+                                int beds_needed = n_reserved_bed + stoi(num_of_beds);
+                                if(beds_needed > capacity)
+                                {
+                                    no_space = true;
+                                    break;
+                                }
+                            }
                         }
                         if (no_space)
                         {

@@ -254,7 +254,7 @@ void Client::build()
 {
     std::cout << "Client is running..." << std::endl;
     int fd = connectServer(data.getPort());
-    char buffer[2048] = {0};
+    char buffer[5000] = {0};
     int id;
     std::string user_admin;
     while (true)
@@ -331,7 +331,7 @@ void Client::build()
         }
         send(fd, command.c_str(), command.size(), 0);
         memset(buffer, 0, sizeof(buffer));
-        read(fd, buffer, 2048);
+        read(fd, buffer, 5000);
         ss.clear();
         ss.str(buffer);
         tokens.clear();

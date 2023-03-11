@@ -22,6 +22,7 @@ public:
     int getprice();
     int getmax_capacity();
     int getcapacity();
+    int get_numOfBeds(int index);
     
     std::vector<userInRoom> getusers();
     
@@ -33,6 +34,7 @@ public:
     void add_user(int id_, std::string numOfBeds_, std::string reserveDate_, std::string checkoutDate_);
     void change_capacity(int reduce_by);
     void del_reservation(int index);
+    void set_numOfBeds(int index, int numOfBeds_);
     
 private:
     std::string number;

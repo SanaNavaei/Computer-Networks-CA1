@@ -164,6 +164,7 @@ void readJson::write_booking(std::string data)
     file.close();
 }
 
+//update purse of user in Userinfo.json
 void readJson::write_purse(std::string data)
 {
     std::ifstream user_file("./UserInfo.json");
@@ -237,6 +238,28 @@ void readJson::write_numOfbeds(std::string data)
                     user["numOfBeds"] = json::parse(data)["numOfBeds"];
                 }
             }
+        }
+    }
+    std::ofstream file("./RoomsInfo.json");
+    file << std::setw(4) << room_data;
+    file.close();
+}
+
+//change capacity of room in RoomInfo.json
+void readJson::write_capacity(std::string data)
+{
+    std::ifstream room_file("./RoomsInfo.json");
+
+    json room_data = json::parse(room_file);
+    room_file.close();
+
+    for (auto& room : room_data["rooms"])
+    {
+        if (room["number"] == json::parse(data)["number"])
+        {
+            room["capacity"] = json::parse(data)["capacity"];
+            room["status"] = json::parse(data)["status"];
+            room["users"].clear();
         }
     }
     std::ofstream file("./RoomsInfo.json");

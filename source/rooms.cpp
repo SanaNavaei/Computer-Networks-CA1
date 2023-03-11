@@ -84,3 +84,13 @@ void Rooms::del_reservation(int index)
 {
     userInRooms.erase(userInRooms.begin() + index);
 }
+
+void Rooms::set_numOfBeds(int index, int numOfBeds_)
+{
+    userInRooms[index].numOfBeds = numOfBeds_;
+}
+
+int Rooms::get_numOfBeds(int index)
+{
+    return userInRooms[index].numOfBeds;
+}

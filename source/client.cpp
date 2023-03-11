@@ -10,8 +10,17 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             return "menu/1/" + std::to_string(id);
         case 2:
             return "menu/2/" + std::to_string(id);
-        case 3:
-            return "menu/3/" + std::to_string(id);
+        case 3:{
+            std::cout << "If you want to see rooms that still have free beds, enter 1 else enter 0" << std::endl;
+            int order;
+            std::cin >> order;
+            if (order == 1)
+                return "menu/3/" + std::to_string(id) + "/1";
+            else if (order == 0)
+                return "menu/3/" + std::to_string(id) + "/0";
+            else
+                return "error";
+        }
         case 4:{
             if(user_admin != "user")
                 return "error403";
@@ -75,21 +84,37 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             }
         }
         case 8:{
-            std::cout << "room <value>" << std::endl;
-            if(user_admin == "admin")
+            if(user_admin == "user")
             {
-                std::cout << "capacity <new capacity>" << std::endl;
+                std::cout << "room <value>" << std::endl;
+                std::string command, room, value;
+                std::getline(std::cin >> std::ws, command);
+                std::stringstream ss(command);
+                std::getline (ss, room, ' ');
+                if (room != "room")
+                    return "error";
+                std::getline(ss, value, ' ');
+                return "menu/8/" + std::to_string(id) + "/" + room + "/" + value;
             }
-            std::string command, roomOrCapacity, value;
-            std::getline(std::cin >> std::ws, command);
-            std::stringstream ss(command);
-            std::getline (ss, roomOrCapacity, ' ');
-            if (user_admin == "user" && roomOrCapacity != "room")
-                return "error";
-            if (user_admin == "admin" && (roomOrCapacity != "room" && roomOrCapacity != "capacity"))
-                return "error";
-            std::getline(ss, value, ' ');
-            return "menu/8/" + std::to_string(id) + "/" + roomOrCapacity + "/" + value;
+            else if(user_admin == "admin")
+            {
+                std::cout << "room <value>" << std::endl;
+                std::string command, roomOrCapacity, value, command2, roomOrCapacity2 , value2;
+                std::getline(std::cin >> std::ws, command);
+                std::stringstream ss(command);
+                std::getline (ss, roomOrCapacity, ' ');
+                if (roomOrCapacity != "room")
+                    return "error";
+                std::getline(ss, value, ' ');
+                std::cout << "capacity <new capacity>" << std::endl;
+                std::getline(std::cin >> std::ws, command2);
+                std::stringstream ss2(command2);
+                std::getline (ss2, roomOrCapacity2, ' ');
+                if (roomOrCapacity2 != "capacity")
+                    return "error";
+                std::getline(ss2, value2, ' ');
+                return "menu/8/" + std::to_string(id) + "/" + value + "/" + value2;
+            }
         }
         case 9:{
             if(user_admin == "user")

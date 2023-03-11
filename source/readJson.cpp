@@ -183,6 +183,67 @@ void readJson::write_purse(std::string data)
     file.close();
 }
 
+//cancel booking in RoomInfo.json
+void readJson::write_cancel(std::string data)
+{
+    std::ifstream room_file("./RoomsInfo.json");
+
+    json room_data = json::parse(room_file);
+    room_file.close();
+
+    for (auto& room : room_data["rooms"])
+    {
+        json newarray = json::array();
+        if (room["number"] == json::parse(data)["number"])
+        {
+            for (auto& user : room["users"])
+            {
+                if (user["id"] == json::parse(data)["id"])
+                {
+                    //set new capacity of room
+                    room["capacity"] = json::parse(data)["capacity"];
+                    room["status"] = json::parse(data)["status"];
+                    user.clear();
+                }
+                else
+                    newarray.emplace_back(user);
+            }
+            room["users"] = newarray;
+        }
+    }
+    std::ofstream file("./RoomsInfo.json");
+    file << std::setw(4) << room_data;
+    file.close();
+}
+
+//update numOfbeds in RoomInfo.json
+void readJson::write_numOfbeds(std::string data)
+{
+    std::ifstream room_file("./RoomsInfo.json");
+
+    json room_data = json::parse(room_file);
+    room_file.close();
+
+    for (auto& room : room_data["rooms"])
+    {
+        if (room["number"] == json::parse(data)["number"])
+        {
+            room["status"] = json::parse(data)["status"];
+            room["capacity"] = json::parse(data)["capacity"];
+            for (auto& user : room["users"])
+            {
+                if (user["id"] == json::parse(data)["id"])
+                {
+                    user["numOfBeds"] = json::parse(data)["numOfBeds"];
+                }
+            }
+        }
+    }
+    std::ofstream file("./RoomsInfo.json");
+    file << std::setw(4) << room_data;
+    file.close();
+}
+
 readJson::readJson()
 {
     //Read config.json

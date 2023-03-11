@@ -625,6 +625,13 @@ std::string Server::cancel(int id, std::istringstream& ss)
                         if (data.rooms[i]->getusers()[j].numOfBeds == stoi(n_person))
                         {
                             data.rooms[i]->del_reservation(j);
+                            if(!compare_date(data.rooms[i]->getusers()[j].reserveDate) && compare_date(data.rooms[i]->getusers()[j].checkoutDate))
+                            {
+                                //change the status and capacity if canceling the reservation which is being held.
+                                data.rooms[i]->change_capacity(-stoi(n_person));
+                                if(data.rooms[i]->getcapacity() == 0)
+                                    data.rooms[i]->set_status(0);
+                            }
                             std::cout << "User id: " << id << " canceled reservation." << std::endl;
                             std::string usrjson = "{\"id\":" + std::to_string(id) + ",\"number\":\"" + room_num + 
                                                     "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + "}";

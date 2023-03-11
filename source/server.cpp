@@ -225,7 +225,7 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
     return;
 }
 
-void Server::leave_room(int id, int fd, std::istringstream& ss)
+void Server::user_leave_room(int id, int fd, std::istringstream& ss)
 {
     std::string message, user_admin;
     std::string value, roomOrCapacity;
@@ -315,6 +315,93 @@ void Server::leave_room(int id, int fd, std::istringstream& ss)
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
+}
+
+void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
+{
+    std::string room_number, capacity;
+    std::string message;
+    std::getline(ss, room_number, '/'); //room_number
+    std::getline(ss, capacity, '/'); //capacity
+
+    //check if there is empty field
+    if (room_number == "" || capacity == "")
+    {
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "Admin id: " << id << " tried to leave room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+
+    //check if value is number
+    if (checkIsANumber(room_number, fd) == false || checkIsANumber(capacity, fd) == false)
+    {
+        message = ERR503;
+        message += "/" + std::to_string(id) + "/admin";
+        std::cout << "Admin id: " << id << " tried to leave room." << std::endl;
+        send(fd, message.c_str(), message.size(), 0);
+        return;
+    }
+
+    for (int i = 0; i < data.rooms.size(); i++)
+    {
+        if (data.rooms[i]->getnum() == room_number)  //check if room exist
+        {
+            if(capacity == "0")
+            {
+                //In this part, we remove the users from chosen room and set the room status to 0 and capacity to max capacity
+                data.rooms[i]->set_capacity(data.rooms[i]->getmax_capacity());
+                data.rooms[i]->set_status(0);
+                data.rooms[i]->set_userInRooms({});
+                std:: string jsondata = "{\"id\":" + std::to_string(id) + ",\"number\":\"" + room_number + 
+                                    "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + 
+                                    ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + ",\"users\":" + "[]}";
+                message = ERR413;
+                message += "/" + std::to_string(id) + "/admin";
+                std::cout << "Admin id: " << id << " made room empty." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                data.write_capacity(jsondata);
+                return;
+            }
+
+            //check new capacity is bigger than current capacity
+            else if (std::stoi(capacity) > data.rooms[i]->getcapacity())
+            {
+                message = ERR412;
+                message += "/" + std::to_string(id) + "/admin";
+                std::cout << "Admin id: " << id << " tried to empty room." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                return;
+            }
+
+            //error if new capacity is smaller than current capacity and it is not 0
+            else
+            {
+                message = ERR401;
+                message += "/" + std::to_string(id) + "/admin";
+                std::cout << "Admin id: " << id << " tried to empty room." << std::endl;
+                send(fd, message.c_str(), message.size(), 0);
+                return;
+            }
+        }
+    }
+
+    //room not exist
+    message = ERR101;
+    message += "/" + std::to_string(id) + "/admin";
+    std::cout << "Admin id: " << id << " tried to leave room." << std::endl;
+    send(fd, message.c_str(), message.size(), 0);
+    return;
+}
+
+void Server::leave_room(int id, int fd, std::istringstream& ss)
+{
+    if(check_if_is_admin(id))
+        admin_leave_room(id, fd, ss);
+    else 
+        user_leave_room(id, fd, ss);
+
 }
 
 bool Server::check_room_exist(std::string room_number)
@@ -806,7 +893,6 @@ std::string Server::book(int id, std::istringstream& ss)
                             std::string jsonpurse = "{\"purse\":\"" + std::to_string(purse - cost) + "\",\"id\":" + std::to_string(id) + "}";
                             data.write_purse(jsonpurse);
                             int not_started = compare_date(check_in_date);
-                            //std::cout << not_started << "check_in: " << check_in_date << "sys_date: "<< sys_date.day << "-" << sys_date.month << "-" << sys_date.year <<" " <<"hereeeee\n";
                             if (!not_started)//if true no change in capacity... else change the capacity..
                             {
                                 std::cout << "is started ...\n";
@@ -835,7 +921,7 @@ std::string Server::book(int id, std::istringstream& ss)
     return "";
 }
 
-std::string Server::rooms_info_gathering(int id)///
+std::string Server::rooms_info_gathering(int id, std::string command)
 {
     std::stringstream ss;
     bool is_admin = check_if_is_admin(id);
@@ -843,30 +929,64 @@ std::string Server::rooms_info_gathering(int id)///
     ss << "rooms info: \n";
     for (int i = 0; i < data.rooms.size(); i++)
     {
-        ss << "number: " << data.rooms[i]->getnum() << std::endl;
-        ss << "status: " << data.rooms[i]->getstatus() << std::endl;
-        ss << "price: " << data.rooms[i]->getprice() << std::endl;
-        ss << "maxCapacity: " << data.rooms[i]->getmax_capacity() << std::endl;
-        ss << "capacity: " << data.rooms[i]->getcapacity() << std::endl;
-        if (is_admin)
+        //user want to see rooms that are not full
+        if (command == "1")
         {
-            ss << "------------------------" << std::endl;
-            ss << "users in this room: " << std::endl;
-            bool is_empty = true;
-            for (int j = 0; j < data.rooms[i]->getusers().size(); j++)
+            if (data.rooms[i]->getstatus() == 0)
             {
-                is_empty = false;
-                if(j) ss << "------------------------" << std::endl;
-                ss << "user number " << j + 1 << ": " << std::endl;
-                ss << "id: " << data.rooms[i]->getusers()[j].id << std::endl;
-                ss << "number of reserved beds: " << data.rooms[i]->getusers()[j].numOfBeds << std::endl;
-                ss << "from date: " << data.rooms[i]->getusers()[j].reserveDate << std::endl;
-                ss << "to date: " << data.rooms[i]->getusers()[j].checkoutDate << std::endl;
+                ss << "number: " << data.rooms[i]->getnum() << std::endl;
+                ss << "status: " << data.rooms[i]->getstatus() << std::endl;
+                ss << "price: " << data.rooms[i]->getprice() << std::endl;
+                ss << "maxCapacity: " << data.rooms[i]->getmax_capacity() << std::endl;
+                ss << "capacity: " << data.rooms[i]->getcapacity() << std::endl;
+                if (is_admin)
+                {
+                    ss << "------------------------" << std::endl;
+                    ss << "users in this room: " << std::endl;
+                    bool is_empty = true;
+                    for (int j = 0; j < data.rooms[i]->getusers().size(); j++)
+                    {
+                        is_empty = false;
+                        if(j) ss << "------------------------" << std::endl;
+                        ss << "user number " << j + 1 << ": " << std::endl;
+                        ss << "id: " << data.rooms[i]->getusers()[j].id << std::endl;
+                        ss << "number of reserved beds: " << data.rooms[i]->getusers()[j].numOfBeds << std::endl;
+                        ss << "from date: " << data.rooms[i]->getusers()[j].reserveDate << std::endl;
+                        ss << "to date: " << data.rooms[i]->getusers()[j].checkoutDate << std::endl;
+                    }
+                    if (is_empty)
+                        ss << "this room is empty." << std::endl;
+                }
+                ss << "###########################" << std::endl;
             }
-            if (is_empty)
-                ss << "this room is empty." << std::endl;
         }
-        ss << "###########################" << std::endl;
+        else
+        {
+            ss << "number: " << data.rooms[i]->getnum() << std::endl;
+            ss << "status: " << data.rooms[i]->getstatus() << std::endl;
+            ss << "price: " << data.rooms[i]->getprice() << std::endl;
+            ss << "maxCapacity: " << data.rooms[i]->getmax_capacity() << std::endl;
+            ss << "capacity: " << data.rooms[i]->getcapacity() << std::endl;
+            if (is_admin)
+            {
+                ss << "------------------------" << std::endl;
+                ss << "users in this room: " << std::endl;
+                bool is_empty = true;
+                for (int j = 0; j < data.rooms[i]->getusers().size(); j++)
+                {
+                    is_empty = false;
+                    if(j) ss << "------------------------" << std::endl;
+                    ss << "user number " << j + 1 << ": " << std::endl;
+                    ss << "id: " << data.rooms[i]->getusers()[j].id << std::endl;
+                    ss << "number of reserved beds: " << data.rooms[i]->getusers()[j].numOfBeds << std::endl;
+                    ss << "from date: " << data.rooms[i]->getusers()[j].reserveDate << std::endl;
+                    ss << "to date: " << data.rooms[i]->getusers()[j].checkoutDate << std::endl;
+                }
+                if (is_empty)
+                    ss << "this room is empty." << std::endl;
+            }
+            ss << "###########################" << std::endl;
+        }
     }
     ss << "/" << id;
     if (is_admin)
@@ -893,7 +1013,7 @@ std::string Server::user_info_gathering(int id)
         ss << "address: " << data.users[i]->getaddress() << std::endl;
         ss << "###########################" << std::endl;
     }
-    ss << "/" << id;
+    ss << "/" << id << "/admin";
     std::string info;
     info = ss.str();
     return info;
@@ -933,9 +1053,9 @@ std::string Server::get_info(int id)
     {
         if (id == data.admins[i]->getid())
         {
-            ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
-            ss << "name: " << data.users[i]->getname() << std::endl;
-            ss << "password: " << data.users[i]->getpassword() << std::endl;
+            ss << "id: " << std::to_string(data.admins[i]->getid()) << std::endl;
+            ss << "name: " << data.admins[i]->getname() << std::endl;
+            ss << "password: " << data.admins[i]->getpassword() << std::endl;
             ss << "###########################" << std::endl;
             ss << "/" << id <<"/admin";
             break;
@@ -976,8 +1096,9 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
         }
         case 3: //View rooms information
         {
-            std::string rooms_info;
-            rooms_info = rooms_info_gathering(id);
+            std::string rooms_info, command;
+            std::getline(ss, command, '/'); //command
+            rooms_info = rooms_info_gathering(id, command);
             send(fd, rooms_info.c_str(), rooms_info.size(), 0);
             break;
         }

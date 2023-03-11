@@ -806,10 +806,13 @@ std::string Server::book(int id, std::istringstream& ss)
                             std::string jsonpurse = "{\"purse\":\"" + std::to_string(purse - cost) + "\",\"id\":" + std::to_string(id) + "}";
                             data.write_purse(jsonpurse);
                             int not_started = compare_date(check_in_date);
+                            //std::cout << not_started << "check_in: " << check_in_date << "sys_date: "<< sys_date.day << "-" << sys_date.month << "-" << sys_date.year <<" " <<"hereeeee\n";
                             if (!not_started)//if true no change in capacity... else change the capacity..
                             {
+                                std::cout << "is started ...\n";
                                 data.rooms[j]->change_capacity(stoi(num_of_beds));
-                                data.rooms[j]->set_status(1);
+                                if(data.rooms[j]->getcapacity() == 0)
+                                    data.rooms[j]->set_status(1);
                             }
                             ss2 << "successfully being reserved!" << std::endl << "/" << id << "/user";
                             std::cout << "User id: " << id << " reserved room number: " << room_num << std::endl;

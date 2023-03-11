@@ -27,6 +27,7 @@ public:
     void write_purse(std::string data);
     void write_cancel(std::string data);
     void write_numOfbeds(std::string data);
+    void write_capacity(std::string data);
 
     int getPort();
 

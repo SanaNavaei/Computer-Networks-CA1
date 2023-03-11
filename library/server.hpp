@@ -27,6 +27,7 @@
 #define ERR312 "312: Information was changed successfully."
 #define ERR401 "401: Invalid value!"
 #define ERR403 "403: Access denied!"
+#define ERR412 "412: Invalid capacity value!"
 #define ERR413 "413: Successfully Leaving."
 #define ERR430 "430: Invalid username or password."
 #define ERR451 "451: User already existed!"
@@ -59,10 +60,12 @@ public:
     void leave_room(int id, int fd, std::istringstream &ss);
     void pass_day(int id, int fd, std::istringstream &ss);
     void handle_pass_day();
+    void user_leave_room(int id, int fd, std::istringstream& ss);
+    void admin_leave_room(int id, int fd, std::istringstream &ss);
 
     std::string get_info(int id);
     std::string user_info_gathering(int id);
-    std::string rooms_info_gathering(int id);
+    std::string rooms_info_gathering(int id, std::string command);
     std::string book(int id, std::istringstream& ss);
     std::string cancel(int id, std::istringstream& ss);
     std::string get_all_reservations(int id);

@@ -446,6 +446,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR503;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to add room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with id " << id << " tried to add room but results in ERR503." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -456,6 +459,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR503;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to add room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with the id " << id << " tried to add a room but results in ERR503." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -468,6 +474,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
                 message = ERR111;
                 message += "/" + std::to_string(id) + "/admin";
                 std::cout << "Admin id: " << id << " tried to add room." << std::endl;
+                log_m.str("");
+                log_m << "the admin with the id " << id << " tried to add a room with number: " << RoomNum 
+                      << "max capacity: " << MaxCapacity << "price: " << Price << " but results in ERR111." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 return;
             }
@@ -481,6 +491,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         std::cout << "Admin id: " << id << " added room." << std::endl;
         std::string jsondata = "{\"number\":\"" + RoomNum + "\",\"capacity\":" + MaxCapacity + 
                                 ",\"maxCapacity\":" + MaxCapacity + ",\"price\":" + Price + ",\"status\":0,\"users\":[]}";
+        log_m.str("");
+        log_m << "the admin with the id " << id << " added a room with number: " << RoomNum 
+              << "max capacity: " << MaxCapacity << "price: " << Price << " successfully." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         data.write_addroom(jsondata);
         return; 
@@ -498,6 +512,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR503;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with id " << id << " tried to modify room but results in ERR503." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -508,6 +525,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR503;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with id " << id << " tried to modify room but results in ERR503." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -518,6 +538,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR101;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with the id " << id << " tried to modify a room with number: " << RoomNum 
+                  << "new max capacity: " << newMaxCapacity << "new price: " << newPrice << " but results in ERR101." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -532,6 +556,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
                     message = ERR109;
                     message += "/" + std::to_string(id) + "/admin";
                     std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+                    log_m.str("");
+                    log_m << "the admin with the id " << id << " tried to modify a room with number: " << RoomNum 
+                          << "new max capacity: " << newMaxCapacity << "new price: " << newPrice << " but results in ERR109." << std::endl;
+                    logMessage(log_m.str());
                     send(fd, message.c_str(), message.size(), 0);
                     return;
                 }
@@ -548,6 +576,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
                     message = ERR503;
                     message += "/" + std::to_string(id) + "/admin";
                     std::cout << "Admin id: " << id << " tried to modify room." << std::endl;
+                    log_m.str("");
+                    log_m << "the admin with the id " << id << " tried to modify a room with number: " << RoomNum 
+                          << "new max capacity: " << newMaxCapacity << "new price: " << newPrice << " but results in ERR503." << std::endl;
+                    logMessage(log_m.str());
                     send(fd, message.c_str(), message.size(), 0);
                     return;
                 }
@@ -579,6 +611,10 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         std::string jsondata = "{\"number\":\"" + RoomNum + "\",\"capacity\":" + std::to_string(newCapacity) + 
                                 ",\"maxCapacity\":" + newMaxCapacity + ",\"price\":" + newPrice + 
                                 ",\"status\":" + std::to_string(status) + "}";
+        log_m.str("");
+        log_m << "the admin with the id " << id << " modified a room with number: " << RoomNum 
+              << "new max capacity: " << newMaxCapacity << "new price: " << newPrice << " successfully." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         data.write_modifiedroom(jsondata);
         return;
@@ -594,6 +630,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR503;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with id " << id << " tried to remove room but results in ERR503." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -604,6 +643,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR503;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with id " << id << " tried to remove room but results in ERR503." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -614,6 +656,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             message = ERR101;
             message += "/" + std::to_string(id) + "/admin";
             std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+            log_m.str("");
+            log_m << "the admin with id " << id << " tried to remove a room with number: " << RoomNum << " but results in ERR101." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -628,6 +673,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
                     message = ERR109;
                     message += "/" + std::to_string(id) + "/admin";
                     std::cout << "Admin id: " << id << " tried to remove room." << std::endl;
+                    log_m.str("");
+                    log_m << "the admin with id " << id << " tried to remove a room with number: " << RoomNum << " but results in ERR109." << std::endl;
+                    logMessage(log_m.str());
                     send(fd, message.c_str(), message.size(), 0);
                     return;
                 }
@@ -647,6 +695,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "Admin id: " << id << " removed room." << std::endl;
         std::string jsondata = "{\"number\":\"" + RoomNum + "\"}";
+        log_m.str("");
+        log_m << "the admin with id " << id << " removed a room with number: " << RoomNum << " successfully." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         data.write_deleteroom(jsondata);
         return;
@@ -654,6 +705,9 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
     else
     {
         std::cout << "Admin id: " << id << " tried to edit rooms." << std::endl;
+        log_m.str("");
+        log_m << "the admin with id " << id << " tried to edit room but results in ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, ERR503, strlen(ERR503), 0);
     }
 }
@@ -666,6 +720,9 @@ void Server::logout(int id, int fd)
         {
             loggedInIds.erase(loggedInIds.begin() + i);
             std::cout << "User id: " << id << " logged out." << std::endl;
+            log_m.str("");
+            log_m << "the user/admin with the id " << id << " logged out." << std::endl;
+            logMessage(log_m.str());
             send(fd, ERR201, strlen(ERR201), 0);
             break;
         }

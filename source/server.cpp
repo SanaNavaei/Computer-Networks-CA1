@@ -70,6 +70,9 @@ void Server::handle_pass_day()
                 std::string jsondata = "{\"id\":" + std::to_string(users[i].id) + ",\"number\":\"" + room->getnum() + 
                                         "\",\"capacity\":" + std::to_string(room->getcapacity()) + 
                                         ",\"status\":" + std::to_string(room->getstatus()) + "}";
+                log_m.str("");
+                log_m << "the checkout date of user with the id " << users[i].id << " for the room number " << room->getnum() << " is reached." << std::endl;
+                logMessage(log_m.str());
                 data.write_leaveroom(jsondata);
             }
         }
@@ -92,6 +95,9 @@ void Server::pass_day(int id, int fd, std::istringstream& ss)
         message = ERR503;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "User id: " << id << " tried to pass day." << std::endl;
+        log_m.str("");
+        log_m << "the admin with the id " << id << " tried to pass day but results ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -102,6 +108,9 @@ void Server::pass_day(int id, int fd, std::istringstream& ss)
         message = ERR503;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "User id: " << id << " tried to pass day." << std::endl;
+        log_m.str("");
+        log_m << "the admin with the id " << id << " tried to pass day but results ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -113,6 +122,9 @@ void Server::pass_day(int id, int fd, std::istringstream& ss)
         message = ERR401;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "User id: " << id << " tried to pass day." << std::endl;
+        log_m.str("");
+        log_m << "the admin with the id " << id << " tried to pass day for " << day << " days but results ERR401." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -176,6 +188,9 @@ void Server::pass_day(int id, int fd, std::istringstream& ss)
     message += "/" + std::to_string(id) + "/admin";
     std::cout << "Admin id: " << id << " passed " << day << " days." << std::endl;
     std::cout << "Date: " << sys_date.day << "-" << sys_date.month << "-" << sys_date.year << std::endl;
+    log_m.str("");
+    log_m << "the admin with the id " << id << " passed the days for " << day << "days successfully." << std::endl;
+    logMessage(log_m.str());
     handle_pass_day();
     send(fd, message.c_str(), message.size(), 0);
     return;
@@ -197,6 +212,9 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
                 message = ERR503;
                 message += "/" + std::to_string(data.users[i]->getid()) + "/user";
                 std::cout << "User id: " << id << " tried to edit information." << std::endl;
+                log_m.str("");
+                log_m << "the user with the id " << id << " tried to edit information but results ERR503." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 return;
             }
@@ -208,6 +226,9 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
             std::cout << "User id: " << id << " edited information." << std::endl;
             
             std::string jsondata = "{\"id\":" + std::to_string(id) + ",\"password\":\"" + password + "\",\"phoneNumber\":\"" + phone + "\",\"address\":\"" + address + "\",\"admin\":\"false\"}";
+            log_m.str("");
+            log_m << "the user with the id " << id << " edited information successfully." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             data.write_editinfo(jsondata);
             return;
@@ -224,6 +245,9 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
                 message = ERR503;
                 message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
                 std::cout << "Admin id: " << id << " tried to edit information." << std::endl;
+                log_m.str("");
+                log_m << "the admin with the id " << id << " tried to edit information but results ERR503." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 return;
             }
@@ -232,6 +256,9 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
             message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
             std::cout << "Admin id: " << id << " edited information." << std::endl;
             std::string jsondata = "{\"id\":" + std::to_string(id) + ",\"password\":\"" + password + "\",\"admin\":\"true\"}";
+            log_m.str("");
+            log_m << "the admin with the id " << id << " edited information successfully." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             data.write_editinfo(jsondata);
             return;
@@ -242,22 +269,20 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
 
 void Server::user_leave_room(int id, int fd, std::istringstream& ss)
 {
-    std::string message, user_admin;
+    std::string message;
     std::string value, roomOrCapacity;
     std::getline(ss, roomOrCapacity, '/'); //roomOrCapacity
     std::getline(ss, value, '/'); //room_number
-
-    if (check_if_is_admin(id) == true)
-        user_admin = "admin";
-    else
-        user_admin = "user";
 
     //check if there is empty field
     if (value == "")
     {
         message = ERR503;
-        message += "/" + std::to_string(id) + "/" + user_admin;
+        message += "/" + std::to_string(id) + "/user";
         std::cout << "User id: " << id << " tried to leave room." << std::endl;
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to leave the room but results ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -266,8 +291,11 @@ void Server::user_leave_room(int id, int fd, std::istringstream& ss)
     if (checkIsANumber(value, fd) == false)
     {
         message = ERR503;
-        message += "/" + std::to_string(id) + "/" + user_admin;
+        message += "/" + std::to_string(id) + "/user";
         std::cout << "User id: " << id << " tried to leave room." << std::endl;
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to leave the room but results ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -288,8 +316,11 @@ void Server::user_leave_room(int id, int fd, std::istringstream& ss)
                         if(compare_date(usersExists[j].reserveDate) == true)
                         {
                             message = ERR503;
-                            message += "/" + std::to_string(id) + "/" + user_admin;
+                            message += "/" + std::to_string(id) + "/user";
                             std::cout << "User id: " << id << " tried to leave room." << std::endl;
+                            log_m.str("");
+                            log_m << "the user with the id " << id << " tried to leave the room number " << value << " but results ERR503." << std::endl;
+                            logMessage(log_m.str());
                             send(fd, message.c_str(), message.size(), 0);
                             return;
                         }
@@ -306,8 +337,11 @@ void Server::user_leave_room(int id, int fd, std::istringstream& ss)
                                                 "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + 
                                                 ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + ",\"admin\":\"false\"}";  
                         message = ERR413;
-                        message += "/" + std::to_string(id) + "/" + user_admin;
+                        message += "/" + std::to_string(id) + "/user";
                         std::cout << "User id: " << id << " left room." << std::endl;
+                        log_m.str("");
+                        log_m << "the user with the id " << id << " left the room number " << value << " successfully." << std::endl;
+                        logMessage(log_m.str());
                         send(fd, message.c_str(), message.size(), 0);
                         data.write_leaveroom(jsondata);
                         return;
@@ -316,8 +350,11 @@ void Server::user_leave_room(int id, int fd, std::istringstream& ss)
 
                 //user not exist in room
                 message = ERR102;
-                message += "/" + std::to_string(id) + "/" + user_admin;
+                message += "/" + std::to_string(id) + "/user";
                 std::cout << "User id: " << id << " tried to leave room." << std::endl;
+                log_m.str("");
+                log_m << "the user with the id " << id << " tried to leave the room number " << value << " but results ERR102." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 return;
             }
@@ -325,8 +362,11 @@ void Server::user_leave_room(int id, int fd, std::istringstream& ss)
 
         //room not exist
         message = ERR503;
-        message += "/" + std::to_string(id) + "/" + user_admin;
+        message += "/" + std::to_string(id) + "/user";
         std::cout << "User id: " << id << " tried to leave room." << std::endl;
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to leave the room number " << value << " but results ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -345,6 +385,9 @@ void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
         message = ERR503;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "Admin id: " << id << " tried to leave room." << std::endl;
+        log_m.str("");
+        log_m << "the admin with the id " << id << " tried to leave room but results in ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -355,6 +398,9 @@ void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
         message = ERR503;
         message += "/" + std::to_string(id) + "/admin";
         std::cout << "Admin id: " << id << " tried to leave room." << std::endl;
+        log_m.str("");
+        log_m << "the admin with the id " << id << " tried to leave room but results in ERR503." << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -375,6 +421,9 @@ void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
                 message = ERR413;
                 message += "/" + std::to_string(id) + "/admin";
                 std::cout << "Admin id: " << id << " made room empty." << std::endl;
+                log_m.str("");
+                log_m << "the admin with the id " << id << " made the room number " << room_number << " empty successfully." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 data.write_capacity(jsondata);
                 return;
@@ -386,6 +435,9 @@ void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
                 message = ERR412;
                 message += "/" + std::to_string(id) + "/admin";
                 std::cout << "Admin id: " << id << " tried to empty room." << std::endl;
+                log_m.str("");
+                log_m << "the admin with the id " << id << " tried to empty the room number " << room_number << " but results ERR412." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 return;
             }
@@ -396,6 +448,9 @@ void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
                 message = ERR401;
                 message += "/" + std::to_string(id) + "/admin";
                 std::cout << "Admin id: " << id << " tried to empty room." << std::endl;
+                log_m.str("");
+                log_m << "the admin with the id " << id << " tried to empty the room number " << room_number << " but results ERR401." << std::endl;
+                logMessage(log_m.str());
                 send(fd, message.c_str(), message.size(), 0);
                 return;
             }
@@ -406,6 +461,9 @@ void Server::admin_leave_room(int id, int fd, std::istringstream& ss)
     message = ERR101;
     message += "/" + std::to_string(id) + "/admin";
     std::cout << "Admin id: " << id << " tried to leave room." << std::endl;
+    log_m.str("");
+    log_m << "the admin with the id " << id << " tried to leave room number " << room_number << "but results in ERR101." << std::endl;
+    logMessage(log_m.str());
     send(fd, message.c_str(), message.size(), 0);
     return;
 }
@@ -1079,6 +1137,15 @@ std::string Server::rooms_info_gathering(int id, std::string command)
                     }
                     if (is_empty)
                         ss << "this room is empty." << std::endl;
+                    log_m.str("");
+                    log_m << "the admin with the id " << id << " wanted to see all rooms info that still has free beds. and the info of those rooms are being showed." << std::endl;
+                    logMessage(log_m.str());
+                }
+                else
+                {
+                    log_m.str("");
+                    log_m << "the user with the id " << id << " wanted to see all rooms info that still has free beds. and the info of those rooms are being showed." << std::endl;
+                    logMessage(log_m.str());
                 }
                 ss << "###########################" << std::endl;
             }
@@ -1107,25 +1174,26 @@ std::string Server::rooms_info_gathering(int id, std::string command)
                 }
                 if (is_empty)
                     ss << "this room is empty." << std::endl;
+                log_m.str("");
+                log_m << "the admin with the id " << id << " wanted to see all rooms info. and the info of all rooms are being showed." << std::endl;
+                logMessage(log_m.str());
+            }
+            else
+            {
+                log_m.str("");
+                log_m << "the admin with the id " << id << " wanted to see all rooms info. and the info of all rooms are being showed." << std::endl;
+                logMessage(log_m.str());
             }
             ss << "###########################" << std::endl;
         }
     }
+    
     ss << "/" << id;
     if (is_admin)
-    {
         ss << "/admin";
-        log_m.str("");
-        log_m << "the admin with the id " << id << " wanted to see all rooms info. and the info of all rooms being showed." << std::endl;
-        logMessage(log_m.str());
-    }
     else
-    {
         ss << "/user";
-        log_m.str("");
-        log_m << "the user with the id " << id << " wanted to see all rooms info. and the info of all rooms being showed." << std::endl;
-        logMessage(log_m.str());
-    }
+    
     std::string room_info;
     room_info = ss.str();
     return room_info;
@@ -1398,7 +1466,7 @@ void Server::checkusername(std::string name, int fd)
         if (username == name)
         {
             message =  ERR451;
-            log_m.str("");////
+            log_m.str("");
             log_m << "the client with fd " << fd << " tried to signup but results ERR451" << std::endl;
             logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);

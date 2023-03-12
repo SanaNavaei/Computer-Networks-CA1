@@ -1,5 +1,20 @@
 #include "../library/server.hpp"
 
+std::stringstream log_m;  
+
+void logMessage(std::string message) {
+    std::ofstream logfile;
+    logfile.open("logfile.txt", std::ios_base::app); // open the file in append mode
+    if (logfile.is_open()) {
+        auto time_now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::string timestamp = std::ctime(&time_now); // get the current time as a string
+        logfile << timestamp.substr(0, timestamp.length()-1) << " - " << message << std::endl;
+        logfile.close();
+    } else {
+        std::cerr << "Failed to open log file" << std::endl;
+    }
+}
+
 Server::Server(readJson data_) : data(data_) {}
 
 void Server::set_date(std::string day_, std::string month_, std::string year_)
@@ -668,6 +683,9 @@ std::string Server::cancel(int id, std::istringstream& ss)
     if (room_num == "" || n_person == "")
     {
         ss2 << ERR401 << std::endl << "/" << id << "/user";
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to cancel a reservation but results in ERR401." << std::endl;
+        logMessage(log_m.str());
         return ss2.str();
     }
 
@@ -675,6 +693,9 @@ std::string Server::cancel(int id, std::istringstream& ss)
     if (checkIsANumber(room_num, 0) == false || checkIsANumber(n_person, 0) == false)
     {
         ss2 << ERR401 << std::endl << "/" << id << "/user";
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to cancel a reservation but results in ERR401." << std::endl;
+        logMessage(log_m.str());
         return ss2.str();
     }
     
@@ -693,6 +714,10 @@ std::string Server::cancel(int id, std::istringstream& ss)
                         //over limit...
                         ss2 << ERR102 << std::endl << "/" << id << "/user";
                         std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
+                        log_m.str("");
+                        log_m << "the user with the id " << id << " tried to cancel a reservation with the room num: " << room_num 
+                              << " for " << n_person << "person but results in ERR102." << std::endl;
+                        logMessage(log_m.str());
                         return ss2.str();
                     }
                     else
@@ -719,6 +744,10 @@ std::string Server::cancel(int id, std::istringstream& ss)
                                                     "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + "}";
                             data.write_cancel(usrjson);
                             ss2 << ERR110 << std::endl << "/" << id << "/user";
+                            log_m.str("");
+                            log_m << "the user with the id " << id << " canceled a reservation with the room num: " << room_num 
+                                  << " for " << n_person << "person." << std::endl;
+                            logMessage(log_m.str());
                             return ss2.str();
                         }
                         else
@@ -738,6 +767,10 @@ std::string Server::cancel(int id, std::istringstream& ss)
                                                     std::to_string(data.rooms[i]->getcapacity()) + "}";
                             ss2 << ERR110 << std::endl << "/" << id << "/user";
                             data.write_numOfbeds(usrjson);
+                            log_m.str("");
+                            log_m << "the user with the id " << id << " canceled a reservation with the room num: " << room_num 
+                                  << " for " << n_person << "person." << std::endl;
+                            logMessage(log_m.str());
                             return ss2.str();
                         }
                     }
@@ -746,6 +779,10 @@ std::string Server::cancel(int id, std::istringstream& ss)
             //no reservation found 
             ss2 << ERR102 << std::endl << "/" << id << "/user";
             std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
+            log_m.str("");
+            log_m << "the user with the id " << id << " tried to cancel a reservation with the room num: " << room_num 
+                  << " for " << n_person << "person but results in ERR102." << std::endl;
+            logMessage(log_m.str());
             return ss2.str();
 
         }
@@ -753,6 +790,10 @@ std::string Server::cancel(int id, std::istringstream& ss)
     //the room not found...
     ss2 << ERR101 << std::endl << "/" << id << "/user";
     std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
+    log_m.str("");
+    log_m << "the user with the id " << id << " tried to cancel a reservation with the room num: " << room_num 
+          << " for " << n_person << "person but results in ERR101." << std::endl;
+    logMessage(log_m.str());
     return ss2.str();
 }
 
@@ -780,6 +821,9 @@ std::string Server::get_all_reservations(int id)
     }
     ss << "/" << id << "/user" << "/#";
     std::cout << "User id: " << id << " got all reservations." << std::endl;
+    log_m.str("");
+    log_m << "the user with the id " << id << " tried to cancel a reservation so first the info of all his/her reservations are being showed to him/her. " << std::endl;
+    logMessage(log_m.str());
     return ss.str();
 
 }
@@ -826,6 +870,9 @@ std::string Server::book(int id, std::istringstream& ss)
     if (room_num == "" || num_of_beds == "" || check_in_date == "" || check_out_date == "")
     {
         ss2 << ERR503 << std::endl << "/" << id << "/user";
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to book a room but results ERR503. " << std::endl;
+        logMessage(log_m.str());
         return ss2.str();
     }
 
@@ -833,6 +880,9 @@ std::string Server::book(int id, std::istringstream& ss)
     if (checkIsANumber(room_num, 0) == false || checkIsANumber(num_of_beds, 0) == false || checkDateFormat(check_in_date, false) == false || checkDateFormat(check_out_date, false) == false)
     {
         ss2 << ERR503 << std::endl << "/" << id << "/user";
+        log_m.str("");
+        log_m << "the user with the id " << id << " tried to book a room but results ERR503. " << std::endl;
+        logMessage(log_m.str());
         return ss2.str();
     }
 
@@ -850,6 +900,10 @@ std::string Server::book(int id, std::istringstream& ss)
                     if (cost > purse)
                     {
                         ss2 << ERR108 << std::endl << "/" << id << "/user";
+                        log_m.str("");
+                        log_m << "the user with the id " << id << " tried to book a room with number: " << room_num << " for " 
+                              << num_of_beds << " person from " << check_in_date << " to " << check_out_date << " but results ERR108." << std::endl;
+                        logMessage(log_m.str());
                         return ss2.str();
                     }
                     else
@@ -881,6 +935,10 @@ std::string Server::book(int id, std::istringstream& ss)
                         if (no_space)
                         {
                             ss2 << ERR109 << std::endl << "/" << id << "/user";
+                            log_m.str("");
+                            log_m << "the user with the id " << id << " tried to book a room with number: " << room_num << " for " 
+                                  << num_of_beds << " person from " << check_in_date << " to " << check_out_date << " but results ERR109." << std::endl;
+                            logMessage(log_m.str());
                             return ss2.str();
                         }
                         else
@@ -900,7 +958,7 @@ std::string Server::book(int id, std::istringstream& ss)
                                 if(data.rooms[j]->getcapacity() == 0)
                                     data.rooms[j]->set_status(1);
                             }
-                            ss2 << "successfully being reserved!" << std::endl << "/" << id << "/user";
+                            ss2 << ERR110 << std::endl << "/" << id << "/user";
                             std::cout << "User id: " << id << " reserved room number: " << room_num << std::endl;
                             std::string json_userdata = "{\"id\":" + std::to_string(id) + ",\"numOfBeds\":" + 
                                                     num_of_beds + ",\"reserveDate\":\"" + check_in_date + "\",\"checkoutDate\":\"" + 
@@ -908,6 +966,10 @@ std::string Server::book(int id, std::istringstream& ss)
                             std::string jsondata = "{\"number\":\"" + room_num + "\",\"status\":" + std::to_string(data.rooms[j]->getstatus()) + 
                                                     ",\"capacity\":" + std::to_string(data.rooms[j]->getcapacity()) + ",\"users\":" + json_userdata + "}";
                             data.write_booking(jsondata);
+                            log_m.str("");
+                            log_m << "the user with the id " << id << " successfully book a room with number: " << room_num << " for " 
+                                  << num_of_beds << " person from " << check_in_date << " to " << check_out_date << "." << std::endl;
+                            logMessage(log_m.str());
                             return ss2.str();
                         }
                     }
@@ -915,6 +977,10 @@ std::string Server::book(int id, std::istringstream& ss)
             }
             //the room not found...
             ss2 << ERR101 << std::endl << "/" << id << "/user";
+            log_m.str("");
+            log_m << "the user with the id " << id << " tried to book a room with number: " << room_num << " for " 
+                  << num_of_beds << " person from " << check_in_date << " to " << check_out_date << " but results ERR101." << std::endl;
+            logMessage(log_m.str());
             return ss2.str();
         }
     }
@@ -990,9 +1056,19 @@ std::string Server::rooms_info_gathering(int id, std::string command)
     }
     ss << "/" << id;
     if (is_admin)
+    {
         ss << "/admin";
+        log_m.str("");
+        log_m << "the admin with the id " << id << " wanted to see all rooms info. and the info of all rooms being showed." << std::endl;
+        logMessage(log_m.str());
+    }
     else
+    {
         ss << "/user";
+        log_m.str("");
+        log_m << "the user with the id " << id << " wanted to see all rooms info. and the info of all rooms being showed." << std::endl;
+        logMessage(log_m.str());
+    }
     std::string room_info;
     room_info = ss.str();
     return room_info;
@@ -1016,6 +1092,9 @@ std::string Server::user_info_gathering(int id)
     ss << "/" << id << "/admin";
     std::string info;
     info = ss.str();
+    log_m.str("");
+    log_m << "the admin with the id " << id << " wanted to view all users info. and all info being showed." << std::endl;
+    logMessage(log_m.str());
     return info;
 
 }
@@ -1038,6 +1117,10 @@ std::string Server::get_info(int id)
     {
         if (id == data.users[i]->getid())
         {
+            log_m.str("");
+            log_m << "the user with the id " << id << " wanted to view his/her info." << std::endl;
+            logMessage(log_m.str());
+            
             ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
             ss << "name: " << data.users[i]->getname() << std::endl;
             ss << "password: " << data.users[i]->getpassword() << std::endl;
@@ -1053,6 +1136,10 @@ std::string Server::get_info(int id)
     {
         if (id == data.admins[i]->getid())
         {
+            log_m.str("");
+            log_m << "the admin with the id " << id << " wanted to view his/her info" << std::endl;
+            logMessage(log_m.str());
+            
             ss << "id: " << std::to_string(data.admins[i]->getid()) << std::endl;
             ss << "name: " << data.admins[i]->getname() << std::endl;
             ss << "password: " << data.admins[i]->getpassword() << std::endl;
@@ -1090,6 +1177,9 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
                 std::stringstream ss;
                 ss << ERR403 << "/" << id << "/user";
                 info = ss.str();
+                log_m.str("");
+                log_m << "the user with the id " << id << " tried to see all users info but results ERR403." << std::endl;
+                logMessage(log_m.str());
             }
             send(fd, info.c_str(), info.size(), 0);
             break;

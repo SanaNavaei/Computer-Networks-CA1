@@ -363,15 +363,7 @@ void Client::build()
         while (std::getline(ss, token, '/')){
             tokens.push_back(token);
         }
-        if (tokens[0][0] == '#' || tokens[0] == ERR403)
-        {
-            std::cout << tokens[0] << std::endl;
-            id = stoi(tokens[1]);
-            user_admin = tokens[2];
-            user_list(id, user_admin);
-        }
-        else
-            std::cout << tokens[0] << std::endl;
+        std::cout << tokens[0] << std::endl;
     }
 }
 

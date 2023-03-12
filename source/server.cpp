@@ -1151,6 +1151,9 @@ void Server::signin(std::string username, std::string password, int fd)
             message = ERR230;
             message += "/" + std::to_string(data.users[i]->getid()) + "/user" ;
             loggedInIds.push_back(data.users[i]->getid());
+            log_m.str("");
+            log_m << "the user with the name " << username << " signed-in." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -1163,11 +1166,17 @@ void Server::signin(std::string username, std::string password, int fd)
             message = ERR230;
             message += "/" + std::to_string(data.admins[i]->getid()) + "/admin";
             loggedInIds.push_back(data.admins[i]->getid());
+            log_m.str("");
+            log_m << "the admin with the name " << username << " signed-in." << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
     }
     message = ERR430;
+    log_m.str("");
+    log_m << "the client with fd " << fd << " tried to signin but results ERR430" << std::endl;
+    logMessage(log_m.str());
     send(fd, message.c_str(), message.size(), 0);
     return;
 }
@@ -1190,12 +1199,18 @@ void Server::signup(std::string username, std::string password, std::string purs
     if(checkIsANumber(purse, fd) == false)
     {
         std::string message = ERR503;
+        log_m.str("");
+        log_m << "the user " << username << " tried to set password, purse, phoneNumber and address but results ERR503" << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
     else if(checkIsANumber(phoneNumber, fd) == false)
     {
         std::string message = ERR503;
+        log_m.str("");
+        log_m << "the user " << username << " tried to set password, purse, phoneNumber and address but results ERR503" << std::endl;
+        logMessage(log_m.str());
         send(fd, message.c_str(), message.size(), 0);
         return;
     }
@@ -1203,6 +1218,9 @@ void Server::signup(std::string username, std::string password, std::string purs
     data.users.push_back(new User(data.users.size()+ data.admins.size(), username, password, purse, phoneNumber, address));
     
     std::string message = ERR231;
+    log_m.str("");
+    log_m << "the user " << username << " signed-up successfully by setting some info." << std::endl;
+    logMessage(log_m.str());
     send(fd, message.c_str(), message.size(), 0);
     data.write_signedup(jsondata);
 }
@@ -1218,6 +1236,9 @@ void Server::checkusername(std::string name, int fd)
         if (username == name)
         {
             message =  ERR451;
+            log_m.str("");
+            log_m << "the client with fd " << fd << " tried to signup but results ERR451" << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -1230,6 +1251,9 @@ void Server::checkusername(std::string name, int fd)
         if (username == name)
         {
             message =  ERR451;
+            log_m.str("");////
+            log_m << "the client with fd " << fd << " tried to signup but results ERR451" << std::endl;
+            logMessage(log_m.str());
             send(fd, message.c_str(), message.size(), 0);
             return;
         }
@@ -1237,6 +1261,9 @@ void Server::checkusername(std::string name, int fd)
     std::stringstream ss;
     ss << ERR311 << "/" << name;
     message = ss.str();
+    log_m.str("");
+    log_m << "the client with fd " << fd << " signed-up with the name " << name << "." << std::endl;
+    logMessage(log_m.str());
     send(fd, message.c_str(), message.size(), 0);
 }
 
@@ -1252,6 +1279,9 @@ void Server::checkCommand(char buff[], int fd)
         if (word == "") 
         {
             std::string error =  ERR430;
+            log_m.str("");
+            log_m << "client with fd " << fd << " tried to signup but results ERR430" << std::endl;
+            logMessage(log_m.str());
             send(fd, error.c_str(), error.size(), 0);
         }
         checkusername(word,fd);
@@ -1264,6 +1294,9 @@ void Server::checkCommand(char buff[], int fd)
         if (username == "" || password == "")
         {
             std::string error =  ERR430;
+            log_m.str("");
+            log_m << "the client with fd " << fd << " tried to signin but results ERR430" << std::endl;
+            logMessage(log_m.str());
             send(fd, error.c_str(), error.size(), 0);
         }
         else 
@@ -1313,7 +1346,12 @@ bool Server::checkDateFormat(const std::string& input, bool set_needed) {
     if(year.size() != 4)
         return false;
     if(set_needed)
+    {
         set_date(day, month, year);
+        log_m.str("");
+        log_m << "the system date is being set to " << day << "-" << month << "-" << year << std::endl; 
+        logMessage(log_m.str());
+    }
     return true;
 }
 
@@ -1333,6 +1371,7 @@ int Server::setup_server(int port)
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
         std::cout << "There is a server running on this port." << std::endl;
+        logMessage("another server tried to connect to this port but failed to connect!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -1359,9 +1398,11 @@ void Server::build()
     if (server_fd < 0)
     {
         std::cout << "error in building." << std::endl;
+        logMessage("error in building server.\n");
         exit(EXIT_FAILURE);
     }
     std::cout << "server is running." << std::endl;
+    logMessage("server is running.\n");
     
     std::cout << "enter the date:\n";
     std::string input;
@@ -1372,6 +1413,9 @@ void Server::build()
     if(word != "setTime")
     {
         std::cout << ERR503 << std::endl;
+        log_m.str("");
+        log_m << "tried to set time but results in ERR503. " << std::endl;
+        logMessage(log_m.str());
         exit(EXIT_FAILURE);
     }
     std::string date;
@@ -1379,11 +1423,17 @@ void Server::build()
     if (!checkDateFormat(date, true))
     {
         std::cout << ERR401 << std::endl;
+        log_m.str("");
+        log_m << "tried to set time but results in ERR401. " << std::endl;
+        logMessage(log_m.str());
         exit(EXIT_FAILURE);
     }
     if(ss >> word)
     {
         std::cout << ERR503 << std::endl;
+        log_m.str("");
+        log_m << "tried to set time but results in ERR503. " << std::endl;
+        logMessage(log_m.str());
         exit(EXIT_FAILURE);
     }
     
@@ -1404,6 +1454,9 @@ void Server::build()
                 if (i == server_fd) //new client
                 {
                     int client_fd = acceptClient(server_fd);
+                    log_m.str("");
+                    log_m << "new client with fd " << client_fd << " is connected to the server." << std::endl;
+                    logMessage(log_m.str());
                     FD_SET(client_fd, &master_set);
                     if (client_fd > max_sd)
                         max_sd = client_fd;
@@ -1415,10 +1468,16 @@ void Server::build()
                     if(bytes_recieved == 0)
                     {
                         std::cout << "client disconnected." << std::endl;
+                        log_m.str("");
+                        log_m << "client with fd " << i << " is disconnected." << std::endl;
+                        logMessage(log_m.str());
                         close(i);
                         FD_CLR(i, &master_set);
                         continue;
                     }
+                    log_m.str("");
+                    log_m << "new message from client with fd " << i << "." << std::endl;
+                    logMessage(log_m.str());
                     checkCommand(buffer,i);
                 }
             }

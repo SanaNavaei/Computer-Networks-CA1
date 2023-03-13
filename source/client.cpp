@@ -282,6 +282,7 @@ void Client::build()
     char buffer[5000] = {0};
     int id;
     std::string user_admin;
+    bool flag_cancel = 0;
     while (true)
     {
         std::string command;
@@ -320,6 +321,7 @@ void Client::build()
                 user_admin = tokens[2];
                 if (tokens.size() == 4 && tokens[3] == "#")
                 {
+                    flag_cancel = 1;
                     command = action_sentences(5, id, user_admin);
                 }
                 else
@@ -334,6 +336,7 @@ void Client::build()
                     std::cout << ERR403 << std::endl;
                     continue;
                 }
+                flag_cancel = 0;
             }
         }
 

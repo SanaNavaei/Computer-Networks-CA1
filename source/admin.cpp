@@ -26,3 +26,15 @@ void Admin::setpassword(std::string password_)
 {
     password = password_;
 }
+
+std::string Admin::get_info()
+{
+    std::stringstream ss;
+    ss << "###########################" << std::endl;
+    ss << "id: " << std::to_string(id) << std::endl;
+    ss << "name: " << user << std::endl;
+    ss << "password: " << password << std::endl;
+    ss << "###########################" << std::endl;
+    ss << "/" << id <<"/admin";
+    return ss.str();
+}

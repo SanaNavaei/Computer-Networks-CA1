@@ -66,3 +66,18 @@ void User::cash_back(int cash)
     purse_int += cash;
     purse = std::to_string(purse_int);
 }
+
+std::string User::get_info()
+{
+    std::stringstream ss;
+    ss << "###########################" << std::endl;
+    ss << "id: " << std::to_string(id) << std::endl;
+    ss << "name: " << user << std::endl;
+    ss << "password: " << password << std::endl;
+    ss << "purse: " << purse << std::endl;
+    ss << "phoneNumber: " << phoneNumber << std::endl;
+    ss << "address: " << address << std::endl;
+    ss << "###########################" << std::endl;
+    ss << "/" << id <<"/user";
+    return ss.str();
+}

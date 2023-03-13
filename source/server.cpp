@@ -1243,45 +1243,36 @@ bool Server::check_if_is_admin(int id)
 std::string Server::get_info(int id)
 {
     std::stringstream ss;
-    ss << "###########################" << std::endl;
-    for (int i = 0; i < data.users.size(); i++)
-    {
-        if (id == data.users[i]->getid())
-        {
-            log_m.str("");
-            log_m << "the user with the id " << id << " wanted to view his/her info." << std::endl;
-            logMessage(log_m.str());
-            
-            ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
-            ss << "name: " << data.users[i]->getname() << std::endl;
-            ss << "password: " << data.users[i]->getpassword() << std::endl;
-            ss << "purse: " << data.users[i]->getpurse() << std::endl;
-            ss << "phoneNumber: " << data.users[i]->getphone() << std::endl;
-            ss << "address: " << data.users[i]->getaddress() << std::endl;
-            ss << "###########################" << std::endl;
-            ss << "/" << id <<"/user";
-            break;
-        }
-    }
-    for (int i = 0; i < data.admins.size(); i++)
-    {
-        if (id == data.admins[i]->getid())
-        {
-            log_m.str("");
-            log_m << "the admin with the id " << id << " wanted to view his/her info" << std::endl;
-            logMessage(log_m.str());
-            
-            ss << "id: " << std::to_string(data.admins[i]->getid()) << std::endl;
-            ss << "name: " << data.admins[i]->getname() << std::endl;
-            ss << "password: " << data.admins[i]->getpassword() << std::endl;
-            ss << "###########################" << std::endl;
-            ss << "/" << id <<"/admin";
-            break;
-        }
-    }
-    ss << "/" << id;
     std::string info;
-    info = ss.str();
+    bool is_admin = check_if_is_admin(id);
+    if(is_admin)
+    {
+        for(int i = 0; i < data.admins.size(); i++)
+        {
+            if (id == data.admins[i]->getid())
+            {
+                log_m.str("");
+                log_m << "the admin with the id " << id << " wanted to view his/her info" << std::endl;
+                logMessage(log_m.str());
+                info = data.admins[i]->get_info();
+                break;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < data.users.size(); i++)
+        {
+            if (id == data.users[i]->getid())
+            {
+                log_m.str("");
+                log_m << "the user with the id " << id << " wanted to view his/her info." << std::endl;
+                logMessage(log_m.str());
+                info = data.users[i]->get_info();
+                break;
+            }
+        }
+    }
     return info;
 }
 

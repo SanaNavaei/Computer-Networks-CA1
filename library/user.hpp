@@ -2,6 +2,7 @@
 #define USER_HPP_ "USER_HPP"
 
 #include <string>
+#include <sstream>
 
 class User
 {
@@ -13,6 +14,7 @@ public:
     std::string getphone();
     std::string getaddress();
     std::string getpurse();
+    std::string get_info();
     
     void setpassword(std::string password_);
     void setaddress(std::string address_);

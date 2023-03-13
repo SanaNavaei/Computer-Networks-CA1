@@ -67,17 +67,17 @@ void User::cash_back(int cash)
     purse = std::to_string(purse_int);
 }
 
-std::string User::get_info()
+std::string User::get_info(bool pass_needed)
 {
     std::stringstream ss;
-    ss << "###########################" << std::endl;
+    if(pass_needed) ss << "###########################" << std::endl;
     ss << "id: " << std::to_string(id) << std::endl;
     ss << "name: " << user << std::endl;
-    ss << "password: " << password << std::endl;
+    if(pass_needed) ss << "password: " << password << std::endl;
     ss << "purse: " << purse << std::endl;
     ss << "phoneNumber: " << phoneNumber << std::endl;
     ss << "address: " << address << std::endl;
     ss << "###########################" << std::endl;
-    ss << "/" << id <<"/user";
+    if(pass_needed) ss << "/" << id <<"/user";
     return ss.str();
 }

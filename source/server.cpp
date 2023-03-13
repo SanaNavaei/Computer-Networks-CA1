@@ -1212,13 +1212,7 @@ std::string Server::user_info_gathering(int id)
     ss << "all users info:" << std::endl; 
     for(int i = 0; i < data.users.size(); i++)
     {
-
-        ss << "id: " << std::to_string(data.users[i]->getid()) << std::endl;
-        ss << "name: " << data.users[i]->getname() << std::endl;
-        ss << "purse: " << data.users[i]->getpurse() << std::endl;
-        ss << "phoneNumber: " << data.users[i]->getphone() << std::endl;
-        ss << "address: " << data.users[i]->getaddress() << std::endl;
-        ss << "###########################" << std::endl;
+        ss << data.users[i]->get_info(false);
     }
     ss << "/" << id << "/admin";
     std::string info;
@@ -1227,7 +1221,6 @@ std::string Server::user_info_gathering(int id)
     log_m << "the admin with the id " << id << " wanted to view all users info. and all info being showed." << std::endl;
     logMessage(log_m.str());
     return info;
-
 }
 
 bool Server::check_if_is_admin(int id)
@@ -1254,7 +1247,7 @@ std::string Server::get_info(int id)
                 log_m.str("");
                 log_m << "the admin with the id " << id << " wanted to view his/her info" << std::endl;
                 logMessage(log_m.str());
-                info = data.admins[i]->get_info();
+                info = data.admins[i]->get_info(true);
                 break;
             }
         }

@@ -2,6 +2,18 @@
 
 Client::Client() {}
 
+bool checkIsANumber(std::string input)
+{
+    for (int i = 0; i < input.size(); i++)
+    {
+        if (input[i] < '0' || input[i] > '9')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::string action_sentences(int choice, int id, std::string user_admin)
 {
     switch (choice)
@@ -315,7 +327,7 @@ void Client::build()
         
         else if(tokens.size() > 1 && tokens[0] != ERR311)
         {
-            if(isNumberBetween0And9(tokens[1]))
+            if(checkIsANumber(tokens[1]))
             {
                 id = stoi(tokens[1]);
                 user_admin = tokens[2];

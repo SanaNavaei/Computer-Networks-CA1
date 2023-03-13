@@ -1105,6 +1105,8 @@ std::string Server::book(int id, std::istringstream& ss)
 std::string Server::rooms_info_gathering(int id, std::string command)
 {
     std::stringstream ss;
+    bool flag_c = 0;
+    std::string admin_user;
     bool is_admin = check_if_is_admin(id);
     ss << "###########################" << std::endl;
     ss << "rooms info: \n";
@@ -1113,6 +1115,7 @@ std::string Server::rooms_info_gathering(int id, std::string command)
         //user want to see rooms that are not full
         if (command == "1")
         {
+            flag_c = 1;
             if (data.rooms[i]->getstatus() == 0)
             {
                 ss << "number: " << data.rooms[i]->getnum() << std::endl;
@@ -1122,6 +1125,7 @@ std::string Server::rooms_info_gathering(int id, std::string command)
                 ss << "capacity: " << data.rooms[i]->getcapacity() << std::endl;
                 if (is_admin)
                 {
+                    admin_user = "admin";
                     ss << "------------------------" << std::endl;
                     ss << "users in this room: " << std::endl;
                     bool is_empty = true;
@@ -1137,15 +1141,10 @@ std::string Server::rooms_info_gathering(int id, std::string command)
                     }
                     if (is_empty)
                         ss << "this room is empty." << std::endl;
-                    log_m.str("");
-                    log_m << "the admin with the id " << id << " wanted to see all rooms info that still has free beds. and the info of those rooms are being showed." << std::endl;
-                    logMessage(log_m.str());
                 }
                 else
                 {
-                    log_m.str("");
-                    log_m << "the user with the id " << id << " wanted to see all rooms info that still has free beds. and the info of those rooms are being showed." << std::endl;
-                    logMessage(log_m.str());
+                    admin_user = "user";
                 }
                 ss << "###########################" << std::endl;
             }
@@ -1159,6 +1158,7 @@ std::string Server::rooms_info_gathering(int id, std::string command)
             ss << "capacity: " << data.rooms[i]->getcapacity() << std::endl;
             if (is_admin)
             {
+                admin_user = "admin";
                 ss << "------------------------" << std::endl;
                 ss << "users in this room: " << std::endl;
                 bool is_empty = true;
@@ -1174,20 +1174,26 @@ std::string Server::rooms_info_gathering(int id, std::string command)
                 }
                 if (is_empty)
                     ss << "this room is empty." << std::endl;
-                log_m.str("");
-                log_m << "the admin with the id " << id << " wanted to see all rooms info. and the info of all rooms are being showed." << std::endl;
-                logMessage(log_m.str());
             }
             else
             {
-                log_m.str("");
-                log_m << "the admin with the id " << id << " wanted to see all rooms info. and the info of all rooms are being showed." << std::endl;
-                logMessage(log_m.str());
+                admin_user = "user";
             }
             ss << "###########################" << std::endl;
         }
     }
-    
+    if(flag_c)
+    {
+        log_m.str("");
+        log_m << "the " << admin_user << " with the id " << id << " wanted to see all rooms info that still has free beds. and the info of those rooms are being showed." << std::endl;
+        logMessage(log_m.str());
+    }
+    else
+    {
+        log_m.str("");
+        log_m << "the " << admin_user << " with the id " << id << " wanted to see all rooms info. and the info of all rooms are being showed." << std::endl;
+        logMessage(log_m.str());
+    }
     ss << "/" << id;
     if (is_admin)
         ss << "/admin";

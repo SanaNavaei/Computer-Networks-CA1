@@ -21,291 +21,281 @@ void logMessage(std::string message ,std::string folder_name)
     }
 }
 
-void add_log(int size, std::string token_0, std::string token_2, std::string token_3)
+void add_log(std::string token_0, std::string token_2, std::string token_3)
 {
-    if(size == 4 && token_3 == "1" )
+    if (token_3 == "1")
+    {
+        log_m.str("");
+        log_m << username_global << " successfully saw his/her info. " << std::endl;
+        logMessage(log_m.str(), username_global);
+    }
+    else if (token_3 == "2")
+    {
+        if (token_2 == "user")
         {
             log_m.str("");
-            log_m << username_global << " successfully saw his/her info. " << std::endl;
+            log_m << username_global << " tried to see all users info but access denied " << std::endl;
             logMessage(log_m.str(), username_global);
         }
-
-        if(size == 4 && token_3 == "2")
+        else
         {
-            if(token_2 == "user")
-            {
-                log_m.str("");
-                log_m << username_global << " tried to see all users info but access denied " << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
-            else
-            {
-                log_m.str("");
-                log_m << username_global << " successfully saw all users info. " << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
+            log_m.str("");
+            log_m << username_global << " successfully saw all users info. " << std::endl;
+            logMessage(log_m.str(), username_global);
         }
-
-        if(size == 4 && token_3[0] == '3')
+    }
+    else if (token_3[0] == '3')
+    {
+        if(token_3 == "31")
         {
-            if(token_3 == "31")
-            {
-                log_m.str("");
-                log_m << username_global << " saw all the rooms info which still has empty beds. " << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
-            else
-            {
-                log_m.str("");
-                log_m << username_global << " saw all the rooms info." << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
+            log_m.str("");
+            log_m << username_global << " saw all the rooms info which still has empty beds. " << std::endl;
+            logMessage(log_m.str(), username_global);
         }
-
-        if(size == 4 && token_3 == "4")
+        else
         {
-            std::cout << "i am in 4\n";
-            if(token_0 == ERR503)
+            log_m.str("");
+            log_m << username_global << " saw all the rooms info." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+    }
+    else if (token_3 == "4")
+    {
+        if(token_0 == ERR503)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to book a room but results ERR503." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR108)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to book a room but results ERR108." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR109)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to book a room but results ERR109." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR110)
+        {
+            log_m.str("");
+            log_m << username_global << " successfully booked a room!" << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR101)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to book a room but results ERR101." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }  
+    }
+    else if (token_3 == "5")
+    {
+        if(token_0 == ERR401)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to cancel a room but results ERR401." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR102)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to cancel a room but results ERR102." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR110)
+        {
+            log_m.str("");
+            log_m << username_global << " successfully canceled a room!" << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR101)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to cancel a room but results ERR101." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+    }
+    else if (token_3[0] == '9')
+    {
+        if (token_3 == "9a")
+        {
+            if (token_0 == ERR503)
             {
                 log_m.str("");
-                log_m << username_global << " tried to book a room but results ERR503." << std::endl;
+                log_m << username_global << " tried to add a room but results ERR503." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
-            else if (token_0 == ERR108)
+            else if (token_0 == ERR111)
             {
                 log_m.str("");
-                log_m << username_global << " tried to book a room but results ERR108." << std::endl;
+                log_m << username_global << " tried to add a room but results ERR111." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }
+            else if (token_0 == ERR104)
+            {
+                log_m.str("");
+                log_m << username_global << " successflly added the room." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }   
+        }
+        else if (token_3 == "9m")
+        {
+            if (token_0 == ERR503)
+            {
+                log_m.str("");
+                log_m << username_global << " tried to modify a room but results ERR503." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }
+            else if (token_0 == ERR101)
+            {
+                log_m.str("");
+                log_m << username_global << " tried to modify a room but results ERR101." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
             else if (token_0 == ERR109)
             {
                 log_m.str("");
-                log_m << username_global << " tried to book a room but results ERR109." << std::endl;
+                log_m << username_global << " tried to modify a room but results ERR109." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
-            else if (token_0 == ERR110)
+            else if (token_0 == ERR105)
             {
                 log_m.str("");
-                log_m << username_global << " successfully booked a room!" << std::endl;
+                log_m << username_global << " successfully modified the room." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }                
+        }
+        else if (token_3 == "9r")
+        {
+            if (token_0 == ERR503)
+            {
+                log_m.str("");
+                log_m << username_global << " tried to remove a room but results ERR503." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
             else if (token_0 == ERR101)
             {
                 log_m.str("");
-                log_m << username_global << " tried to book a room but results ERR101." << std::endl;
+                log_m << username_global << " tried to remove a room but results ERR101." << std::endl;
                 logMessage(log_m.str(), username_global);
-            }  
+            }
+            else if (token_0 == ERR109)
+            {
+                log_m.str("");
+                log_m << username_global << " tried to remove a room but results ERR109." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }
+            else if (token_0 == ERR106)
+            {
+                log_m.str("");
+                log_m << username_global << " successfully removed the room." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }   
         }
-
-        if(size == 4 && token_3 == "5")
+        else if (token_3 == "9")
         {
-            if(token_0 == ERR401)
-            {
-                log_m.str("");
-                log_m << username_global << " tried to cancel a room but results ERR401." << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
-            else if (token_0 == ERR102)
-            {
-                log_m.str("");
-                log_m << username_global << " tried to cancel a room but results ERR102." << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
-            else if (token_0 == ERR110)
-            {
-                log_m.str("");
-                log_m << username_global << " successfully canceled a room!" << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
-            else if (token_0 == ERR101)
-            {
-                log_m.str("");
-                log_m << username_global << " tried to cancel a room but results ERR101." << std::endl;
-                logMessage(log_m.str(), username_global);
-            }
-        }
-
-        if (size == 4 && token_3[0] == '9')
-        {
-            if (token_3 == "9a")
-            {
-                if (token_0 == ERR503)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to add a room but results ERR503." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR111)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to add a room but results ERR111." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR104)
-                {
-                    log_m.str("");
-                    log_m << username_global << " successflly added the room." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }   
-            }
-            else if (token_3 == "9m")
-            {
-                if (token_0 == ERR503)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to modify a room but results ERR503." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR101)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to modify a room but results ERR101." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR109)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to modify a room but results ERR109." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR105)
-                {
-                    log_m.str("");
-                    log_m << username_global << " successfully modified the room." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }                
-            }
-            else if (token_3 == "9r")
-            {
-                if (token_0 == ERR503)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to remove a room but results ERR503." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR101)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to remove a room but results ERR101." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR109)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to remove a room but results ERR109." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR106)
-                {
-                    log_m.str("");
-                    log_m << username_global << " successfully removed the room." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }   
-            }
-            else if (token_3 == "9")
-            {
-                log_m.str("");
-                log_m << username_global << " tried to edit a room but results ERR503." << std::endl;
-                logMessage(log_m.str(), username_global);
-            }  
-        }
-
-        if (size == 4 && token_3 == "8")
-        {
-            if (token_2 == "admin")
-            {
-                if (token_0 == ERR503)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to empty a room but results ERR503." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR413)
-                {
-                    log_m.str("");
-                    log_m << username_global << " successfully make the room empty!" << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR412)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to empty a room but results ERR412." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR401)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to empty a room but results ERR401." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR101)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to empty a room but results ERR101." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }                
-                
-            }
-            else if (token_2 == "user")
-            {
-                if (token_0 == ERR503)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to leave a room but results ERR503." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR413)
-                {
-                    log_m.str("");
-                    log_m << username_global << " successfully left the room!" << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-                else if (token_0 == ERR102)
-                {
-                    log_m.str("");
-                    log_m << username_global << " tried to leave a room but results ERR102." << std::endl;
-                    logMessage(log_m.str(), username_global);
-                }
-            } 
-        }
-
-        if (size == 4 && token_3 == "7")
+            log_m.str("");
+            log_m << username_global << " tried to edit a room but results ERR503." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }  
+    }
+    else if (token_3 == "8")
+    {
+        if (token_2 == "admin")
         {
             if (token_0 == ERR503)
             {
                 log_m.str("");
-                log_m << username_global << " tried to edit info but results ERR503." << std::endl;
+                log_m << username_global << " tried to empty a room but results ERR503." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
-            else if (token_0 == ERR312)
+            else if (token_0 == ERR413)
             {
                 log_m.str("");
-                log_m << username_global << " successfully edited the info!" << std::endl;
+                log_m << username_global << " successfully make the room empty!" << std::endl;
                 logMessage(log_m.str(), username_global);
-            } 
-        }
-        
-        if (size == 4 && token_3 == "6")
-        {
-            if (token_0 == ERR503)
+            }
+            else if (token_0 == ERR412)
             {
                 log_m.str("");
-                log_m << username_global << " tried to pass day but results ERR503." << std::endl;
+                log_m << username_global << " tried to empty a room but results ERR412." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
             else if (token_0 == ERR401)
             {
                 log_m.str("");
-                log_m << username_global << " tried to pass day but results ERR401." << std::endl;
+                log_m << username_global << " tried to empty a room but results ERR401." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
-            else if (token_0 == ERR312)
+            else if (token_0 == ERR101)
             {
                 log_m.str("");
-                log_m << username_global << " successfully passed days!" << std::endl;
+                log_m << username_global << " tried to empty a room but results ERR101." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }                        
+        }
+        else if (token_2 == "user")
+        {
+            if (token_0 == ERR503)
+            {
+                log_m.str("");
+                log_m << username_global << " tried to leave a room but results ERR503." << std::endl;
                 logMessage(log_m.str(), username_global);
             }
+            else if (token_0 == ERR413)
+            {
+                log_m.str("");
+                log_m << username_global << " successfully left the room!" << std::endl;
+                logMessage(log_m.str(), username_global);
+            }
+            else if (token_0 == ERR102)
+            {
+                log_m.str("");
+                log_m << username_global << " tried to leave a room but results ERR102." << std::endl;
+                logMessage(log_m.str(), username_global);
+            }
+        } 
+    }
+    else if (token_3 == "7")
+    {
+        if (token_0 == ERR503)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to edit info but results ERR503." << std::endl;
+            logMessage(log_m.str(), username_global);
         }
+        else if (token_0 == ERR312)
+        {
+            log_m.str("");
+            log_m << username_global << " successfully edited the info!" << std::endl;
+            logMessage(log_m.str(), username_global);
+        } 
+    }    
+    else if (token_3 == "6")
+    {
+        if (token_0 == ERR503)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to pass day but results ERR503." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR401)
+        {
+            log_m.str("");
+            log_m << username_global << " tried to pass day but results ERR401." << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+        else if (token_0 == ERR312)
+        {
+            log_m.str("");
+            log_m << username_global << " successfully passed days!" << std::endl;
+            logMessage(log_m.str(), username_global);
+        }
+    }
 }
 
 bool checkIsANumber(std::string input)
@@ -780,8 +770,8 @@ void Client::build()
         while (std::getline(ss, token, '/')){
             tokens.push_back(token);
         }
-        if(flag_inner_error == 0)
-            add_log(tokens.size(), tokens[0], tokens[2], tokens[3]);
+        if(flag_inner_error == 0 && tokens.size() == 4)
+            add_log(tokens[0], tokens[2], tokens[3]);
         
         flag_inner_error = 0;
         

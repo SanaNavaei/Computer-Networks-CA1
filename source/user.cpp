@@ -78,6 +78,6 @@ std::string User::get_info(bool pass_needed)
     ss << "phoneNumber: " << phoneNumber << std::endl;
     ss << "address: " << address << std::endl;
     ss << "###########################" << std::endl;
-    if(pass_needed) ss << "/" << id <<"/user";
+    if(pass_needed) ss << "/" << id <<"/user/1";
     return ss.str();
 }

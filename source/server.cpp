@@ -838,7 +838,19 @@ std::string Server::cancel(int id, std::istringstream& ss)
                     }
                     else
                     {
-                        //cash back and delete reservation
+                        //check if the reservation not started yet! if is started can not cancel it anymore!
+                        //check if the reservation is being held 
+                        if(!compare_date(data.rooms[i]->getusers()[j].reserveDate) && compare_date(data.rooms[i]->getusers()[j].checkoutDate))
+                        {
+                            ss2 << ERR401 << "/" << id << "/user/5";
+                            std::cout << "User id: " << id << " tried to cancel reservation." << std::endl;
+                            log_m.str("");
+                            log_m << "the user with the id " << id << " tried to cancel a reservation with the room num: " << room_num 
+                                  << " for " << n_person << "person but results in ERR401." << std::endl;
+                            logMessage(log_m.str());
+                            return ss2.str();
+                        }
+                        //cash_back
                         for (int k = 0; k < data.users.size(); k++)
                         {
                             if (data.users[k]->getid() == id)
@@ -848,39 +860,31 @@ std::string Server::cancel(int id, std::istringstream& ss)
                                 data.write_purse(jsoncash);
                             }
                         }
-                        
+
+                        //del reservation
                         //check if the n_person is equal to the number of beds
                         if (data.rooms[i]->getusers()[j].numOfBeds == stoi(n_person))
                         {
                             data.rooms[i]->del_reservation(j);
-                            data.rooms[i]->change_capacity(-stoi(n_person));
-                            data.rooms[i]->set_status(0);
                             std::cout << "User id: " << id << " canceled reservation." << std::endl;
-                            std::string usrjson = "{\"id\":" + std::to_string(id) + ",\"number\":\"" + room_num + 
-                                                    "\",\"capacity\":" + std::to_string(data.rooms[i]->getcapacity()) + ",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + "}";
+                            std::string usrjson = "{\"id\":" + std::to_string(id) + ",\"number\":\"" + room_num + "\"}";
                             data.write_cancel(usrjson);
                             ss2 << ERR110 << "/" << id << "/user/5";
                             log_m.str("");
                             log_m << "the user with the id " << id << " canceled a reservation with the room num: " << room_num 
                                   << " for " << n_person << "person." << std::endl;
                             logMessage(log_m.str());
+
                             return ss2.str();
                         }
                         else
                         {
                             int num = data.rooms[i]->getusers()[j].numOfBeds;
                             data.rooms[i]->set_numOfBeds(j, num - stoi(n_person));
-                            if(!compare_date(data.rooms[i]->getusers()[j].reserveDate) && compare_date(data.rooms[i]->getusers()[j].checkoutDate))
-                            {
-                                //change the status and capacity if canceling the reservation which is being held.
-                                data.rooms[i]->change_capacity(-stoi(n_person));
-                                if(data.rooms[i]->getcapacity() < data.rooms[i]->getmax_capacity())
-                                    data.rooms[i]->set_status(0);
-                            }
                             std::cout << "User id: " << id << " canceled reservation." << std::endl;
                             std::string usrjson = "{\"id\":" + std::to_string(id) + ",\"numOfBeds\":" + std::to_string(data.rooms[i]->get_numOfBeds(j))+ 
-                                                    ",\"number\":\"" + room_num + "\",\"status\":" + std::to_string(data.rooms[i]->getstatus()) + ",\"capacity\":" + 
-                                                    std::to_string(data.rooms[i]->getcapacity()) + "}";
+                                                    ",\"number\":\"" + room_num + "\"}";
+                                                    
                             ss2 << ERR110 << "/" << id << "/user/5";
                             data.write_numOfbeds(usrjson);
                             log_m.str("");

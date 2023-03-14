@@ -200,12 +200,7 @@ void readJson::write_cancel(std::string data)
             for (auto& user : room["users"])
             {
                 if (user["id"] == json::parse(data)["id"])
-                {
-                    //set new capacity of room
-                    room["capacity"] = json::parse(data)["capacity"];
-                    room["status"] = json::parse(data)["status"];
                     user.clear();
-                }
                 else
                     newarray.emplace_back(user);
             }
@@ -229,8 +224,6 @@ void readJson::write_numOfbeds(std::string data)
     {
         if (room["number"] == json::parse(data)["number"])
         {
-            room["status"] = json::parse(data)["status"];
-            room["capacity"] = json::parse(data)["capacity"];
             for (auto& user : room["users"])
             {
                 if (user["id"] == json::parse(data)["id"])
@@ -244,6 +237,7 @@ void readJson::write_numOfbeds(std::string data)
     file << std::setw(4) << room_data;
     file.close();
 }
+
 
 //change capacity of room in RoomInfo.json
 void readJson::write_capacity(std::string data)

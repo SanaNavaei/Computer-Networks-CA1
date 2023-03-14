@@ -2,6 +2,25 @@
 
 Client::Client() {}
 
+std::stringstream log_m;
+std::string username_global;
+
+void logMessage(std::string message ,std::string folder_name) 
+{
+    std::ofstream logfile;
+    mkdir(folder_name.c_str(), 0777);
+    std::string file_name = folder_name + "/" + folder_name + ".txt";
+    logfile.open(file_name, std::ios_base::app); // open the file in append mode
+    if (logfile.is_open()) {
+        auto time_now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::string timestamp = std::ctime(&time_now); // get the current time as a string
+        logfile << timestamp.substr(0, timestamp.length()-1) << " - " << message << std::endl;
+        logfile.close();
+    } else {
+        std::cerr << "Failed to open log file" << std::endl;
+    }
+}
+
 bool checkIsANumber(std::string input)
 {
     for (int i = 0; i < input.size(); i++)
@@ -27,53 +46,121 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             int order;
             std::cin >> order;
             if (order == 1)
+            {
+                log_m.str("");
+                log_m << username_global << " by choosing option " << order <<" wanted to see the rooms that still have free beds " << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "menu/3/" + std::to_string(id) + "/1";
+            }
             else if (order == 0)
+            {
+                log_m.str("");
+                log_m << username_global << " by choosing option " << order << " wanted to see all the rooms info. " << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "menu/3/" + std::to_string(id) + "/0";
+            } 
             else
+            {
+                log_m.str("");
+                log_m << username_global << " choosed option " << order << " which is not valid. " << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "error";
+            }
         }
         case 4:{
             if(user_admin != "user")
+            {
+                log_m.str("");
+                log_m << username_global << " tried to book a room but access denied. " << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "error403";
+            }
             std::cout << "book <RoomNum> <NumOfBeds> <CheckInDate> <CheckOutDate>" << std::endl;
             std::string command, RoomNum, NumOfBeds, CheckInDate, CheckOutDate, book;
             std::getline(std::cin >> std::ws, command);
             std::stringstream ss(command);
             std::getline (ss, book, ' ');
             if (book != "book")
+            {
+                log_m.str("");
+                log_m << username_global << " tried to book a room but results typo." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "error";
+            }
             std::getline(ss, RoomNum, ' ');
             std::getline (ss, NumOfBeds, ' ');
             std::getline (ss, CheckInDate, ' ');
             std::getline (ss, CheckOutDate, ' ');
+            log_m.str("");
+            log_m << username_global << " tried to book a room number " << RoomNum << ", with " << NumOfBeds << " beds from "
+                  << CheckInDate << " to " << CheckOutDate << "." << std::endl;
+            logMessage(log_m.str(), username_global);
+            
             return "menu/4/" + std::to_string(id) + "/" + RoomNum + "/" + NumOfBeds + "/" + CheckInDate + "/" + CheckOutDate;
         }
         case 5:{
             if (user_admin != "user")
+            {
+                log_m.str("");
+                log_m << username_global << " tried to cancel a room but access denied. " << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "error403";
+            }
             std::cout << "cancel <RoomNum> <Num>" << std::endl;
             std::string command, RoomNum, Num, cancel;
             std::getline(std::cin >> std::ws, command);
             std::stringstream ss(command);
             std::getline (ss, cancel, ' ');
             if (cancel != "cancel")
+            {
+                log_m.str("");
+                log_m << username_global << " tried to cancel a room but results typo." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "error";
+            }
             std::getline(ss, RoomNum, ' ');
             std::getline (ss, Num, ' ');
+            
+            log_m.str("");
+            log_m << username_global << " tried to cancel a room number " << RoomNum << " for " << Num << " beds." << std::endl;
+            logMessage(log_m.str(), username_global);
+            
             return "menu/55/" + std::to_string(id) + "/" + RoomNum + "/" + Num;
         }
         case 6:{
             if(user_admin != "admin")
+            {
+                log_m.str("");
+                log_m << username_global << " tried to pass day but access denied. " << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "error403";
+            }
             std::cout << "passDay <value>" << std::endl;
             std::string command, passDay, value;
             std::getline(std::cin >> std::ws, command);
             std::stringstream ss(command);
             std::getline (ss, passDay, ' ');
             if (passDay != "passDay")
+            {
+                log_m.str("");
+                log_m << username_global << " tried to pass day but results typo." << std::endl;
+                logMessage(log_m.str(), username_global);
                 return "error";
+            }
             std::getline(ss, value, ' ');
+            
+            log_m.str("");
+            log_m << username_global << " tried to pass day for " << value << " days." << std::endl;
+            logMessage(log_m.str(), username_global);
+            
             return "menu/6/" + std::to_string(id) + "/" + value + "/" + user_admin;
         }   
         case 7:{
@@ -82,6 +169,11 @@ std::string action_sentences(int choice, int id, std::string user_admin)
             {
                 std::cout << "new password" << std::endl;
                 std::cin >> password;
+                
+                log_m.str("");
+                log_m << username_global << " tried to edit his/her password to " << password << "." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/7/" + std::to_string(id) + "/" + password;
             }
             else if(user_admin == "user")
@@ -92,6 +184,12 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::cin >> phone;
                 std::cout << "address" << std::endl;
                 std::cin >> address;
+                
+                log_m.str("");
+                log_m << username_global << " tried to edit info with new password " << password << ", phone "
+                      << phone << ", address " << address << "." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/7/" + std::to_string(id) + "/" + password + "/" + phone + "/" + address;
             }
         }
@@ -104,8 +202,19 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::stringstream ss(command);
                 std::getline (ss, room, ' ');
                 if (room != "room")
+                {
+                    log_m.str("");
+                    log_m << username_global << " tried to leave a room but results typo." << std::endl;
+                    logMessage(log_m.str(), username_global);
+
                     return "error";
+                }
                 std::getline(ss, value, ' ');
+                
+                log_m.str("");
+                log_m << username_global << " tried to leave a room number " << value << "." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/8/" + std::to_string(id) + "/" + room + "/" + value;
             }
             else if(user_admin == "admin")
@@ -116,21 +225,42 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::stringstream ss(command);
                 std::getline (ss, roomOrCapacity, ' ');
                 if (roomOrCapacity != "room")
+                {
+                    log_m.str("");
+                    log_m << username_global << " tried to empty a room but results typo." << std::endl;
+                    logMessage(log_m.str(), username_global);
+
                     return "error";
+                }
                 std::getline(ss, value, ' ');
                 std::cout << "capacity <new capacity>" << std::endl;
                 std::getline(std::cin >> std::ws, command2);
                 std::stringstream ss2(command2);
                 std::getline (ss2, roomOrCapacity2, ' ');
                 if (roomOrCapacity2 != "capacity")
+                {
+                    log_m.str("");
+                    log_m << username_global << " tried to empty a room but results typo." << std::endl;
+                    logMessage(log_m.str(), username_global);
+
                     return "error";
+                }
                 std::getline(ss2, value2, ' ');
+                
+                log_m.str("");
+                log_m << username_global << " tried to empty a room number " << value << " by " << value2 << " beds." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/8/" + std::to_string(id) + "/" + value + "/" + value2;
             }
         }
         case 9:{
             if(user_admin == "user")
             {
+                log_m.str("");
+                log_m << username_global << " tried to edit rooms but access denied. " << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "error403";
             }
             std::cout << "add <RoomNum> <Max Capacity> <Price>" << std::endl;
@@ -145,6 +275,12 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::getline(ss, RoomNum, ' ');
                 std::getline (ss, MaxCapacity, ' ');
                 std::getline (ss, Price, ' ');
+                
+                log_m.str("");
+                log_m << username_global << " tried to add a room number " << RoomNum << " with max capacity "
+                      << MaxCapacity << " and price " << Price << "." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/9/" + std::to_string(id) + "/add/" + RoomNum + "/" + MaxCapacity + "/" + Price;
             }
             else if(order == "modify")
@@ -152,18 +288,41 @@ std::string action_sentences(int choice, int id, std::string user_admin)
                 std::getline(ss, RoomNum, ' ');
                 std::getline (ss, MaxCapacity, ' ');
                 std::getline (ss, Price, ' ');
+                
+                log_m.str("");
+                log_m << username_global << " tried to modify a room number " << RoomNum << " with max capacity "
+                      << MaxCapacity << " and price " << Price << "." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/9/" + std::to_string(id) + "/modify/" + RoomNum + "/" + MaxCapacity + "/" + Price;
             }
             else if(order == "remove")
             {
                 std::getline(ss, RoomNum, ' ');
+                
+                log_m.str("");
+                log_m << username_global << " tried to remove a room number " << RoomNum << "." << std::endl;
+                logMessage(log_m.str(), username_global);
+                
                 return "menu/9/" + std::to_string(id) + "/remove/" + RoomNum;
             }
             else
+            {
+                log_m.str("");
+                log_m << username_global << " tried to edit a room but results typo." << std::endl;
+                logMessage(log_m.str(), username_global);
+
                 return "error";
+            }
         }
         case 0:
+        {
+            log_m.str("");
+            log_m << username_global << " tried to logout." << std::endl;
+            logMessage(log_m.str(), username_global);
+
             return "menu/0/" + std::to_string(id);
+        }
     }
     return "";
 }
@@ -198,9 +357,19 @@ std::string user_list(int id, std::string user_admin)
         std::cout << "--> <choice number> :\n";
         std::string choice_num;
         std::getline(std::cin >> std::ws, choice_num);
+        
+        log_m.str("");
+        log_m << username_global << " order choice number " << choice_num << std::endl;
+        logMessage(log_m.str(), username_global);
+        
         if (!isNumberBetween0And9(choice_num))
         {
             std::cout << ERR503 << std::endl;
+            
+            log_m.str("");
+            log_m << username_global << " order choice number " << choice_num << " but the number was out of range." << std::endl;
+            logMessage(log_m.str(), username_global);
+            
             continue;               
         }
         else
@@ -208,7 +377,13 @@ std::string user_list(int id, std::string user_admin)
             if (stoi(choice_num) == 5)
             {
                 if (user_admin != "user")
+                {
+                    log_m.str("");
+                    log_m << username_global << " order choice number " << choice_num << "but access denied." << std::endl;
+                    logMessage(log_m.str(), username_global);
+                    
                     return "error403";
+                }
                 return "menu/5/" + std::to_string(id);
             }
             return action_sentences(stoi(choice_num),id, user_admin);
@@ -229,6 +404,12 @@ std::string get_data_signup(std::string new_username)
     std:: cout << "Address: ";
     std::getline(std::cin >> std::ws, address);
     std::string str = "signup2/" + new_username + "/" + password + "/" + purse + "/" + phoneNumber + "/" + address;
+    username_global = new_username;
+    
+    log_m.str("");
+    log_m << username_global << " signed-up and tried to set password as " << password << ", purse as " << purse 
+          << ", phone number as " << phoneNumber << " and address as " << address << "." << std::endl;
+    
     return str;
 }
 
@@ -307,11 +488,22 @@ void Client::build()
             tokens.push_back(token);
         }
         
+        if(!tokens.empty() && tokens[0] == ERR231)
+        {
+            logMessage(log_m.str(), username_global);
+        }
+        
         //logged in list
         if(!tokens.empty() && tokens[0] == ERR230) 
         {
             id = stoi(tokens[1]);
             user_admin = tokens[2];
+            username_global = tokens[3];
+            
+            log_m.str("");
+            log_m << username_global << " successfully logged-in. " << std::endl;
+            logMessage(log_m.str(), username_global);
+            
             command = user_list(id, user_admin);
             if (command == "error" && str != ERR503)
             {

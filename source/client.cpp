@@ -720,6 +720,11 @@ std::string define_command(std::string command)
         std::getline (ss, word, ' ');
         str = "signup/" + word;
     }
+    else if(order == "exit")
+    {
+        std::cout << "Goodbye!" << std::endl;
+        exit(0);
+    }
     else
         str = "error";
     return str;
@@ -730,6 +735,7 @@ std::string show_list()
     std::cout << "Please choose one of the following commands:" << std::endl;
     std::cout << "signin <username> <password>" << std::endl;
     std::cout << "signup <username>" << std::endl;
+    std::cout << "exit" << std::endl;
 
     std::string str;
     std::getline(std::cin >> std::ws, str);

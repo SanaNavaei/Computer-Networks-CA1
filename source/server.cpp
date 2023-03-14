@@ -1257,7 +1257,7 @@ std::string Server::get_info(int id)
                 log_m.str("");
                 log_m << "the admin with the id " << id << " wanted to view his/her info" << std::endl;
                 logMessage(log_m.str());
-                info = data.admins[i]->get_info(true);
+                info = data.admins[i]->get_info();
                 break;
             }
         }
@@ -1271,7 +1271,7 @@ std::string Server::get_info(int id)
                 log_m.str("");
                 log_m << "the user with the id " << id << " wanted to view his/her info." << std::endl;
                 logMessage(log_m.str());
-                info = data.users[i]->get_info();
+                info = data.users[i]->get_info(true);
                 break;
             }
         }

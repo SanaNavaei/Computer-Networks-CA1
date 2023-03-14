@@ -35,6 +35,6 @@ std::string Admin::get_info()
     ss << "name: " << user << std::endl;
     ss << "password: " << password << std::endl;
     ss << "###########################" << std::endl;
-    ss << "/" << id <<"/admin";
+    ss << "/" << id <<"/admin/1";
     return ss.str();
 }

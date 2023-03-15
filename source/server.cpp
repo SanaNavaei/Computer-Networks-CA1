@@ -207,7 +207,7 @@ void Server::edit_information(int id, int fd, std::istringstream& ss)
             std::getline(ss, password, '/'); //password
             std::getline(ss, phone, '/'); //phone
             std::getline(ss, address, '/'); //address
-            if (data.users[i]->getpassword() == password && data.users[i]->getaddress() == address && data.users[i]->getphone() == phone && checkIsANumber(phone, fd) == false)
+            if ((data.users[i]->getpassword() == password && data.users[i]->getaddress() == address && data.users[i]->getphone() == phone) || (checkIsANumber(phone, fd) == false))
             {
                 message = ERR503;
                 message += "/" + std::to_string(data.users[i]->getid()) + "/user/7";

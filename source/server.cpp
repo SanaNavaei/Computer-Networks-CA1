@@ -540,7 +540,7 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             }
         }
         std::vector<userInRoom> newusers;
-        data.rooms.push_back(new Rooms(RoomNum, 0, stoi(Price), stoi(MaxCapacity), 0, newusers));
+        data.rooms.push_back(new Rooms(RoomNum, 0, stoi(Price), stoi(MaxCapacity), stoi(MaxCapacity), newusers));
         
         //send message to client that room added
         message = ERR104;
@@ -603,12 +603,23 @@ void Server::edit_rooms(int id, int fd, std::istringstream& ss)
             return;
         }
 
-        //check if the room is full
+        //check if the room is full and check if the reservations of now or later won't face problem of low capacity.
         for(int i = 0; i < data.rooms.size(); i++)
         {
             if (data.rooms[i]->getnum() == RoomNum)
             {
-                if (data.rooms[i]->getstatus() == 1)
+                bool low_capacity = false;
+                int numOfUsers = data.rooms[i]->getmax_capacity() - data.rooms[i]->getcapacity();
+                if(numOfUsers > stoi(newMaxCapacity))
+                    low_capacity = true;
+                for(int j = 0; j < data.rooms[i]->getusers().size(); j++)
+                {
+                    if (data.rooms[i]->getusers()[j].numOfBeds > stoi(newMaxCapacity))
+                    {
+                        low_capacity = true;
+                    } 
+                }
+                if (data.rooms[i]->getstatus() == 1 || low_capacity)
                 {
                     message = ERR109;
                     message += "/" + std::to_string(id) + "/admin/9m";

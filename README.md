@@ -1,24 +1,24 @@
 # CN_CHomeworks_1
 
-**سنا ساری نوایی : 810199435**   
-**مریم جعفرآبادی آشتیانی : 810199549**
+**Maryam Jafarabadi Ashtiani : 810199549**  
+**Sana Sari Navaei : 810199435**
 <br/>
 <br/>
 
-## توضیحات اولیه راجع به منطق برنامه 
-در این پروژه، به پیاده سازی یک سرور هتل می‌پردازیم. انواع درخواست‌ها از قبیل، رزرو، کنسل کردن رزرو، ویرایش اطلاعات و اطلاعات دیگر صورت میگیرد. برای هر موجودیت در برنامه کلاس های جداگانه در نظر گرفته شده است. که به شرح هرکدام میپردازیم.
-<br/>
+## Basic explanations
 
-- readJson
-- Server
-- Client
-- User
-- Admin
-- Rooms
+In this project, we will implement a hotel server. All kinds of requests such as reservation, cancellation, editing of information and other information are made. Separate classes are considered for each entity in the program. We will describe each one.
 
-### اول از توضیح کلاس `readJson` شروع میکنیم:  
-این کلاس، کلاسی است که برنامه های ما با آن شروع میشود. داده های ما به صورت 3 فایل json است که RoomsInfo.json، config.json و UserInfo.json نام دارند. این کلاس اطلاعات را از این فایل ها دریافت میکند. `port` و `hostName` از فیلد های پرایوت کلاس هستند و توابع پابلیک این بخش برای نوشتن در فایل های جیسون پس از تغییر اطلاعات استفاده میشود. 
+-   readJson
+-   Server
+-   Client
+-   User
+-   Admin
+-   Rooms
 
+### First, we start by explaining the `readJson` class:
+
+This class is the class with which our program begins. Our data is in the form of 3 json files named RoomsInfo.json, config.json and UserInfo.json. This class receives information from these files. `port` and `hostName` are private class fields and the public functions of this section are used to write to Jason files after changing the information.
 
 ```cpp
 class readJson
@@ -53,17 +53,18 @@ private:
 <br/>
 <br/>
 
-### کلاس `Server`:
-این کلاس وظیفه ی هندل کردن سوکت ها را دارد. از طرف دیگر، توابعی که در این کلاس وجود دارند، دستور های مورد نظر ما را اجرا میکنند. 
-    
+### Class `Server`:
+
+This class is responsible for handling sockets. On the other hand, the functions in this class execute the commands we want.
+
 ```cpp
 class Server
 {
 public:
     Server(readJson data);
-    
+
     int setup_server(int port);
-    
+
     void build();
     void signup(std::string username, std::string password, std::string purse, std::string phoneNumber, std::string address, int fd);
     void checkCommand(char buff[], int fd);
@@ -93,17 +94,19 @@ public:
     bool check_room_exist(std::string room_number);
     bool compare_date(std::string date);
 private:
-    
+
     readJson data;
     Date sys_date;
     std::vector<int> loggedInIds;
 };
 ```
-#### به بررسی توابع مهم در کلاس سرور میپردازیم:
+
+#### We will examine the important functions in the server class:
+
 <br/>
 <br/>
 
-تابع `()build` از مهمترین توابع در کلاس سرور میباشد. در اوایل این تابع، تابع `()setup_server` قرار دارد. این تابع در شکل زیر آمده است. با استفاده از سوکت، یک ارتباط TCP میسازیم. سپس bind میکنیم که به پورتی که دریافت کرده ایم، وصل شویم. در نهایت listen میکنیم تا درخواست ها از سمت کلاینت دریافت شود.  
+`build()` is one of the most important functions in the server class. At the beginning of this function, the function `setup_server()` is located. This function is shown in the figure below. Using sockets, we create a TCP connection. Then we bind to connect to the received port. Finally, we listen until the requests are received from the client side.
 
 ```cpp
 int Server::setup_server(int port)
@@ -113,11 +116,11 @@ int Server::setup_server(int port)
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-    
+
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
-    
+
     //check if there is more than one server running on the same port
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
@@ -130,9 +133,11 @@ int Server::setup_server(int port)
     return server_fd;
 }
 ```
-سپس به یک حلقه ی بی نهایت میرسیم که دو اتفاق ممکن است اتفاق بیفتد:  
-یک: کلاینت جدیدی به سرور متصل شود. در صورتی که کلاینت جدید وارد شود، تابع `()acceptClient` فراخوانی میشود. این تابع بعدا توضیح داده میشود.  
-دو: کلاینتی که قبلا متصل بوده، پیامی ارسال کند. در این حالت اگر تعداد بیتی که از کاربر دریافت شده صفر باشد، به این معناست که کاربر خارج شده و اطلاعاتش حذف میشود. در غیر اینصورت، وارد تابع `()checkCommand` میشود که خواسته های کاربر را بررسی میکند.
+
+Then we reach an infinite loop where two things can happen:
+
+-   Connect a new client to the server. If a new client is entered, the `acceptClient()` function is called. This function will be explained later.
+-   The client that was already connected should send a message. In this case, if the number of bits received from the user is zero, it means that the user is logged out and his information is deleted. Otherwise, it enters the `checkCommand()` function, which checks the user's requests.
 
 ```cpp
 while (true)
@@ -169,7 +174,7 @@ while (true)
     }
 ```
 
-تابع مهم بعدی، `()action_to_be_done` است. در این تابع، با توجه به کامند های مورد نظر، تابع مربوط به هر دستور که کاربر درخواست کرده را فراخوانی میکنیم. اینجا از switch case برای تشخیص دادن دستورات کاربر استفاده شده است. پس از انکه تابع مورد نظر فراخوانی شد، پاسخ از سمت سرور به کاربر ارسال میشود.  
+The next important function is `action_to_be_done()`. In this function, according to the desired commands, we call the function corresponding to each command requested by the user. Here, switch case is used to recognize user commands. After the desired function is called, the response is sent from the server side to the user.
 
 ```cpp
 void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& ss)
@@ -247,9 +252,10 @@ void Server::action_to_be_done(int choice, int id, int fd, std::istringstream& s
 }
 ```
 
-### کلاس `Client`:  
-در این کلاس، مانند کلاس سرور، تابع `()build` نقش اساسی در client.cpp دارد(به علت طولانی بودن تابع، آن را قرار نمیدهیم و بخش های مهم آن را توضیح میدهیم).  
-در ابتدای این تابع، `()connectServer` فراخوانی میشود که سعی میکند به سرور متصل شود. در صورتی که متصل نشد، خطایی چاپ میکنیم و به کاربر اطلاع میدهیم که ارتباط صورت نگرفته است. سپس در یک حلقه بی نهایت میرویم و در آنجا شرط های مختلف برای نشان دادن منوی اصلی و منوی کاربر را مشخص میکنیم.
+### Class `Client`:
+
+In this class, like the server class, `build()` function plays an essential role in client.cpp (due to the length of the function, we will not include it and explain its important parts).  
+At the beginning of this function, `connectServer()` is called to try to connect to the server. If it is not connected, we will print an error and inform the user that the connection has not been established. Then we go in an infinite loop and specify different conditions to show the main menu and the user menu.
 
 ```cpp
 class Client
@@ -263,7 +269,7 @@ private:
 };
 ```
 
-تابع `()connectServer` به صورت زیر است:
+The `connectServer()` function is as follows:
 
 ```cpp
 int Client::connectServer(int port)
@@ -285,7 +291,8 @@ int Client::connectServer(int port)
     return fd;
 }
 ```
-تابع مهم بعدی در `client.cpp`، تابع `()show_list` میباشد. در این تابع، منوی اولیه به کاربر نشون داده میشود. وقتی کلاینت بالا می‌آید، این منو نمایش داده میشود و کاربر میتواند ثبت نام یا لاگین کند و یا از برنامه خارج شود. با زدن هریک از کامندها ، وارد تابع مربوط به خودش میشود.  
+
+The next important function in client.cpp is the `show_list()` function. In this function, the primary menu is shown to the user. When the client comes up, this menu is displayed and the user can register or log in or exit the program. By typing each of the commands, it enters its corresponding function.
 
 ```cpp
 std::string show_list()
@@ -300,7 +307,8 @@ std::string show_list()
     return str;
 }
 ```
-منوی بعدی، منویی است که کلاینت بعد از لاگین کردن مشاهده میکند. در این منو اطلاعاتی از قبیل نشان دادن اطلاعات یوزر، نشان دادن اطلاعات دیگر کاربران برای ادمین، نشان دادن اتاق های هتل، رزرو و کنسل کردن اتاق، شبیه سازی گذشت زمان، ویرایش اطلاعات کاربر، رفتن از اتاق هتل، ویرایش اتاق هتل و خروج از برنامه نمایش داده میشود. سپس کاربر میتواند از بین این کامندها یکی را انتخاب کند و وارد تابع مربوط به خودش بشود.  
+
+The next menu is the menu that the client sees after logging in. In this menu, information such as showing user information, showing other users information for the admin, showing hotel rooms, booking and canceling rooms, simulating the passage of time, editing user information, leaving the hotel room, editing the hotel room, and exiting. It is displayed from the program. Then the user can choose one of these commands and enter the corresponding function.
 
 ```cpp
 std::string user_list(int id, std::string user_admin)
@@ -324,7 +332,7 @@ std::string user_list(int id, std::string user_admin)
         if (!isNumberBetween0And9(choice_num))
         {
             std::cout << ERR503 << std::endl;
-            continue;               
+            continue;
         }
         else
         {
@@ -341,37 +349,37 @@ std::string user_list(int id, std::string user_admin)
 }
 ```
 
-تابع مهم بعدی، تابع `()action_sentences` است که به علت طولانی بودن، از قرار دادن آن خودداری میکنیم و فقط منطق آن را توضیح میدهیم. در این بخش، یک switch case داریم و به ازای تمامی کامندها، بررسی میشود که ورودی های گرفته شده از کاربر به چه فرمتی باشد. همچنین در این بخش، استرینگی که به سرور فرستاده میشود نیز تنظیم میگردد. از طرف دیگر، هندل کردن ورودی های درست از کاربر نیز در این بخش انجام میشود.  
+The next important function is `action_sentences()` function, which we refrain from including due to its length and only explain its logic. In this section, we have a switch case and for all the commands, it is checked what format the inputs taken from the user are. Also, in this section, the string that is sent to the server is also set. On the other hand, handling correct inputs from the user is also done in this section.
 
-### کلاس `User`:
+### Class `User`:
 
-کلاس `User` حاوی اطلاعات یک کاربر در هتل است. توابعی که در بخش public قرار دارند، اطلاعات کاربر را فراخوانی میکنند یا این اطلاعات را تغییر میدهند. این اطلاعات شامل موارد زیر میباشد:
+`User` class contains the information of a user in the hotel. The functions that are in the public section call the users information or change this information. This information includes the following:
 
-- `id`: شناسه کاربر
-- `user`: نام کاربری
-- `password`: رمز عبور
-- `purse`: کیف پول
-- `phoneNumber`: شماره تلفن
-- `address`: آدرس
+-   `id`
+-   `user`
+-   `password`
+-   `purse`
+-   `phoneNumber`
+-   `address`
 
 ```cpp
 class User
 {
 public:
     User(int id_, std::string user_, std::string password_, std::string purse_, std::string phoneNumber_, std::string address_);
-    
+
     std::string getname();
     std::string getpassword();
     std::string getphone();
     std::string getaddress();
     std::string getpurse();
-    
+
     void setpassword(std::string password_);
     void setaddress(std::string address_);
     void setphoneNumber(std::string phoneNumber_);
     void setpurse(std::string purse_);
     void cash_back(int cash);
-    
+
     int getid();
 private:
     int id;
@@ -383,12 +391,13 @@ private:
 };
 ```
 
-### کلاس `Admin`: 
-در این کلاس اطلاعات ادمین نگه داری میشود. برای ادمین کلاس جدا از یوزر در نظر گرفتیم زیرا برای مواقعی که فقط با یوزر یا فقط با ادمین کار داریم، این کلاس ها را به صورت جداگانه میتوانیم استفاده کنیم. توابعی که در این کلاس استفاده شده است، مانند کلاس یوزر، شامل توابعی برای دسترسی به فیلد های پرایوت کلاس میباشد و تابع `()setpassword` برای تغییر دادن رمز استفاده میگردد. کلاس ادمین شامل این اطلاعات است:
+### Class `Admin`:
 
-- `id`: شناسه کاربر
-- `user`: نام کاربری
-- `password`: رمز عبور
+Admin information is kept in this class. We considered a separate class for the admin from the user because we can use these classes separately for the times when we only work with the user or only with the admin. The functions used in this class, such as the user class, include functions to access the private fields of the class, and the `setpassword()` function is used to change the password. Admin class includes this information:
+
+-   `id`
+-   `user`
+-   `password`
 
 ```cpp
 class Admin
@@ -400,7 +409,7 @@ public:
     std::string getpassword();
 
     int getid();
-    
+
     void setpassword(std::string password_);
 private:
     int id;
@@ -409,15 +418,16 @@ private:
 };
 ```
 
-### کلاس `Rooms`:
-این کلاس همانطور که از اسمش مشخص است، اطلاعات مربوط به اتاق ها را نگه میدارد. فیلد های پرایوت این کلاس، شامل ویژگی های هر اتاق است که در زیر آمده است. از طرف دیگر در این بخش یک وکتور تعریف شده است که اطلاعات مربوط به کاربرانی که در هر اتاق اقامت میکنند را نگه میدارد. توابع این کلاس، اطلاعات اتاق را فراخوانی میکنند یا این اطلاعات را تغییر میدهند. این اطلاعات شامل موارد زیر میباشد:
+### Class `Rooms`:
 
-- `number`: شماره اتاق
-- `status`: وضعیت اتاق
-- `price`: قیمت اتاق به ازای هر نفر
-- `maxCapacity`: ظرفیت حداکثر اتاق
-- `capacity`: ظرفیت فعلی اتاق
-- `userInRooms`: اطلاعات کاربرانی که در اتاق اقامت میکنند
+This class stores information about rooms. The private fields of this class include the features of each room, which are listed below. On the other hand, in this section, a vector is defined that keeps the information about the users staying in each room. The functions of this class call the room information or change this information. This information includes the following:
+
+-   `number`
+-   `status`
+-   `price`
+-   `maxCapacity`
+-   `capacity`
+-   `userInRooms`
 
 ```cpp
 struct userInRoom
@@ -433,7 +443,7 @@ class Rooms
 public:
     Rooms(std::string number_, int status_, int price_, int maxCapacity_, int capacity_, std::vector<userInRoom> userInRooms_);
     std::string getnum();
-    
+
     int getstatus();
     int getprice();
     int getmax_capacity();
@@ -441,7 +451,7 @@ public:
     int get_numOfBeds(int index);
 
     std::vector<userInRoom> getusers();
-    
+
     void set_price(int price_);
     void set_maxcap(int maxCapacity_);
     void set_capacity(int capacity_);
@@ -461,184 +471,202 @@ private:
     std::vector<userInRoom> userInRooms;
 };
 ```
-## بررسی دستورات و مقادیر خروجی
-در این بخش دستورات مختلف کد را توضیح میدهیم و همچنین از هر قسمت، خروجی متناظر را نمایش میدهیم. از طرف دیگر، به دلیل طولانی بودن توابع، از قرار دادن آنها خودداری میکنیم و به توضیح کامل از آنها میپردازیم.  
 
-### دستور `setTime`:
-این دستور، ابتدای شروع سرور استفاده میشود. با استفاده از این دستور، سرور زمان حال را انتخاب میکند. شرط هایی که برای چک کردن این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+## Reviewing Commands and Output Values
 
-**بررسی میکنیم که سال بین 1900 تا 2100 باشد**  
-**ماه باید مقداری بین 1 تا 12 داشته باشد**  
-**روز باید مقداری بین 1 تا 31 داشته باشد**  
-**اندازه ورودی سال 4 و همچنین اندازه ورودی ماه و روز باید 2 باشد**  
+In this section, we explain various code commands and display their corresponding outputs. However, due to their length, we refrain from including the functions themselves and provide a comprehensive explanation instead.
+
+### Command `setTime`:
+
+This command is used at the beginning of the server to set the current time. The conditions we consider for checking this section are as follows:
+
+**We check that the year is between 1900 and 2100.**  
+**The month must have a value between 1 and 12.**  
+**The day must have a value between 1 and 31.**  
+**The input size for the year must be 4, and the input size for the month and day must be 2.**
 
 ![alt text](pictures/setTime.png "setTime")
 
-### دستور `signup`:
-وقتی کلاینت دستور `signup` را وارد کند، در سرور ابتدا چک میکنیم که نامی که کاربر انتخاب کرده، در لیست یوزرها قرار دارد یا خیر. اگر قرار نداشت، در اینصورت سایر اطلاعات را از کاربر میگیرد و عملیات ثبت نام را انجام میدهد. اما اگر اسم موردنظر در لیست موجود بود، ارور مربوطه را نشان میدهیم و به منوی اصلی برمیگردیم. شرط هایی که برای چک کردن این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+### Command `signup`:
 
-**بررسی میکنیم که نام کاربری وارد شده، در لیست یوزرها قرار نداشته باشد**  
-**اگر کاربر به جای هر یک از اطلاعات موردنظر، چیزی وارد نکند و آن فیلد خالی باشد، ارور در نظر گرفتیم**  
-**بررسی میکنیم که مقدار کیف پول و همچنین شماره کاربر به صورت رقم باشد در غیر اینصورت ارور دهد**  
+When the client enters the `signup` command, we first check on the server whether the name chosen by the user is in the list of users or not. If it is not there, then it takes other information from the user and performs the registration operation. But if the desired name was in the list, we will show the corresponding error and return to the main menu. The conditions we have considered for checking this section include the following:
+
+**We check that the entered username is not in the list of users**
+**If the user does not enter anything instead of any of the desired information and that field is empty, we considered an error**
+**We check that the amount of the wallet as well as the user number is in the form of digits, otherwise it will give an error**
 
 ![alt text](pictures/signup.png "signup")
 
-### دستور `signin`:
-با زدن این دستور، چک میکنیم که نام کاربری و رمز کاربر با یوزر موردنظر مطابقت داشته باشد. اگر مطابقت داشت، منوی کاربری را نشان میدهیم و اگر نداشت، ارور موردنظر با این بخش را چاپ میکنیم. شرط هایی که برای چک کردن این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+### Command `singin`:
 
-**چک میکنیم که نام کاربری و رمز عبور وارد شده در بین یوزرها و ادمین یافت میشود یا خیر**  
+By typing this command, we check that the user's username and password match the user's comment. If it matches, we show the user menu and if it doesn't match, we print the desired error with this section. The conditions considered for checking this section include the following:
 
-![alt text](pictures/signin.png "signin")  
+**We check whether the entered username and password can be found among users and admin**
 
-### دستور `View user information`:
-در این بخش باید اطلاعات مربوط به کاربر موردنظر را نشان بدهیم. این دستور برای یوزر و ادمین اجرا میشود و اطلاعات فرد از قبیل آدرس، شماره تلفن، کیف پول و ... نمایش داده میشود و اگر فرد موردنظر ادمین باشد، اطلاعات مخصوص به ادمین مانند نام و پسورد نمایش داده میشود. در این قسمت شرط خاصی چک نمیشود فقط به ازای تمامی یوزرها، با استفاده از آیدی فرد موردنظر، میتوانیم آن را پیدا کنیم و اطلاعات مربوط به آن را نمایش دهیم.
+![alt text](pictures/signin.png "signin")
+
+### Command `View user information`:
+
+In this section, we must show information about the desired user. This command is executed for the user and the administrator, and the person's information such as address, phone number, wallet, etc. is displayed, and if the desired person is an administrator, the information specific to the administrator, such as name and password, is displayed. In this section, no special condition is checked, only for all users, we can find it and display related information by using the ID of the desired person.
 
 ![alt text](pictures/viewUserInformation.png "viewUserInformation")
 
-### دستور `View all users`:
-این بخش مربوط به ادمین است و کاربر باید با زدن این دستور خطا بگیرد. در این قسمت اطلاعات تمام کاربران بجز پسورد آنها برای ادمین نمایش داده میشود. شرط هایی که برای چک کردن این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+### Command `View all users`:
 
-**بررسی میکنیم که کاربر ادمین باشد**
-**اگر کاربر این دستور را وارد کند، ارور مربوط به این بخش را دریافت کند**
+This section is related to the admin and the user should get an error by typing this command. In this section, the information of all users except their password is displayed for the admin. The conditions we have considered for checking this section include the following:
 
-برای نشان دادن خروجی این بخش، وارد حساب کاربری ادمین با آیدی 0 شده ایم.  
+**We check that the user is admin**  
+**If the user enters this command, he will receive the error related to this section**
+
+To show the output of this section, we have entered the admin user account with ID 0.  
 ![alt text](pictures/viewAllUsers.png "viewAllUsers")
 
-### دستور `View Rooms Information`:
-در این قسمت اطلاعات اتاق ها را نمایش میدهیم. بخش امتیازی این بخش این است که فقط اتاق های خالی نمایش داده شود که این قسمت را نیز هندل کردیم. به این صورت که وقتی کاربر کامند 3 را انتخاب کرد، بعد از آن میتواند انتخاب کند که کدام اتاق ها را ببیند. نکته دیگر این بخش این است که ادمین میتواند افراد هر اتاق را ببیند ولی یوزر نمیتواند. شرط هایی که در این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+### Command `View Rooms Information`:
 
-**چک میکنیم کاربر میخواهد اتاق های خالی را ببیند یا تمایل به دیدن تمامی اتاق ها دارد.**  
-**چک میکنیم کاربر موردنظر ادمین یا یوزر است، اگر ادمین باشد، باید اطلاعات افراد هر اتاق را نیز نمایش دهیم.**  
+In this section, we display the information of the rooms. The bonus part of this section is to show only empty rooms, which we also handled. In this way, when the user selects command 3, he can choose which rooms to see. Another point of this section is that the admin can see the people of each room, but the user cannot. The conditions that we have considered in this section include the following:
+
+**We check if the user wants to see the empty rooms or wants to see all the rooms.**
+**We check if the desired user is an admin or a user, if it is an admin, we must also display the information of the people in each room.**
 
 ![alt text](pictures/viewRoomsInformation1.png "viewRoomsInformation1")
 
 ![alt text](pictures/viewRoomsInformation2.png "viewRoomsInformation2")
 
-### دستور `book`:
-در این قسمت کاربر میتواند اتاق موردنظر خود را با تاریخ و تعداد تخت دلخواه خودش رزرو کند. این قسمت شرط های زیادی دارد که در ادامه به آنها میپردازیم. شرط هایی که در این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+### Command `book`:
 
-**چک میکنیم که کاربر مورد نظر ادمین نباشد**  
-**چک میکنیم اتاق خواسته شده وجود داشته باشد**  
-**اگر هر یک از داده های خواسته شده خالی یا نامناسب بود، ارور مربوط به خودش چاپ شود**  
-**قبل از رزرو کردن، چک میکنیم فرد موردنظر به اندازه کافی پول داشته باشد**  
-**چک میکنیم اتاق موردنظر در تاریخ موردنظر به اندازه خواسته شده، فضا داشته باشد**  
-**چک میکنیم که تاریخ شروع اقامت از تاریخ الان قدیمی تر نباشد**  
-**اگر تمامی شرط های بالا رعایت شد، سپس عمل رزرو انجام میشود. اگر تاریخ شروع اقامت از تاریخ الان جلوتر باشد، در اینصورت ظرفیت و استاتوس نیازی نیست تغییر بکنند**  
+In this section, the user can book the desired room with the desired date and number of beds. This part has many conditions that we will discuss further. The conditions that we have considered in this section include the following:
+
+**We check that the target user is not an admin**  
+**We check if the requested room exists**  
+**If any of the requested data is empty or inappropriate, the corresponding error will be printed**  
+**Before making a reservation, we check that the person in question has enough money**  
+**We will check if the desired room has the requested size on the desired date**  
+**We check that the start date of the stay is not older than the current date**  
+**If all the above conditions are met, then the reservation will be done. If the start date of the stay is earlier than the current date, then the capacity and status do not need to be changed**
 
 ![alt text](pictures/book1.png "book1")
 
 ![alt text](pictures/book2.png "book2")
 
-### دستور `cancel`:
-در این دستور، کاربر عادی میتواند رزرو خود را لغو کند. اما به این نکته باید توجه داشت که فرض این است که زمانی قادر به انجام این کار میباشد که زمان شروع اقامتش فرا نرسیده باشد در غیر اینصورت ارور میگیرد. همچنین باید به این موضوع دقت کنیم که تعداد تخت هایی که کاربر میخواهد لغو کند، اگر کمتر از تعداد تخت هایی بود که رزرو کرده است، در اینصورت کافیست مقدار اختلاف را بدست آوریم و آپدیت کنیم. اگر این دو مقدار هم اندازه باشند، کل اطلاعات یوزر از آن اتاق حذف میشود و اگر تعداد تخت هایی که میخواهد لغو کند بیشتر از تعداد تخت های رزرو شده باشد، ارور مربوطه را نمایش میدهیم. شرط های این بخش در زیر آورده شده است:  
+### Command `cancel`:
 
-**چک میکنیم که کاربر مورد نظر ادمین نباشد**  
-**چک میکنیم اتاق خواسته شده وجود داشته باشد**  
-**چک کنیم رزرو موردنظر وجود دارد یا خیر**  
-**اگر داده خواسته شده خالی یا غیرعددی بود، ارور دهد**  
-**اگر تعداد تختی که میخواهیم کنسل کنیم، از تعداد تخت رزرو شده بیشتر باشد، خطا دهیم**  
-**بررسی کنیم زمان شروع رزرو اتاق فرا رسیده است یا خیر**  
-**اگر تعداد تختی که میخواهیم کنسل کنیم با تعداد تخت رزرو شده برابر باشد، آن کاربر را از لیست کاربران اتاق حذف میکنیم**  
-**اگر تعداد تخت کنسلی از تخت رزرو کمتر باشد، در اینصورت کافیست مقدار تخت رزرو شده را تغییر دهیم**  
+In this command, the normal user can cancel his reservation. But it should be noted that it is assumed that he is able to do this when the time to start his stay has not arrived, otherwise he will get an error. We should also pay attention to the fact that if the number of beds that the user wants to cancel is less than the number of beds that he has reserved, then it is enough to get the difference and update it. If these two values are the same, the user's entire information will be deleted from that room, and if the number of beds he wants to cancel is more than the number of reserved beds, we will display the corresponding error. The terms of this section are given below:
+
+**We check that the target user is not an admin**  
+**We check if the requested room exists**  
+**Let's check if the desired reservation exists or not**  
+**If the requested data is empty or non-numeric, return an error**  
+**If the number of beds we want to cancel is more than the number of reserved beds, we will give an error**  
+**Let's check whether it is time to start booking the room or not**  
+**If the number of beds we want to cancel is equal to the number of reserved beds, we will remove that user from the list of room users**  
+**If the number of canceled beds is less than the number of reserved beds, then it is enough to change the amount of reserved beds**
 
 ![alt text](pictures/cancel1.png "cancel1")
 ![alt text](pictures/cancel2.png "cancel2")
 
+### Command `passDay`:
 
-### دستور `passDay`:
-در این قسمت ادمین میتواند به تعدادی که میخواهد، روز را به جلو ببرد. اگر کاربر عادی این دستور را وارد کند، خطا میگیرد. شرط هایی که در این قسمت در نظر گرفته ایم، شامل موارد زیر است:
+In this section, the admin can advance the day as many times as he wants. If a normal user enters this command, he will get an error. The conditions that we have considered in this section include the following:
 
-**چک میکنیم که کاربر مورد نظر ادمین باشد**  
-**اگر داده خواسته شده خالی یا غیرعددی بود، ارور دهد**  
-**بررسی میکنیم داده وارد شده مثبت باشد، زیرا نمیتوانیم به عقب برگردیم**  
-**چک میکنیم اگر به ازای روز اضافه شده، از تعداد روز های ماه فراتر رود یا تعداد ماه ها از 12 بیشتر شود، افزایش ماه یا سال خواهیم داشت**  
-**پس از انجام تغییرات تاریخ، سراغ اتاق های هتل میرویم، آنهایی که تاریخ اقامتشان به پایان رسیده است را حذف میکنیم و اگر افرادی در این تاریخ اقامت رزرو کرده اند، استاتوس و ظرفیت اتاق ها را اپدیت میکنیم**  
+**We check that the target user is an admin**  
+**If the requested data is empty or non-numeric, return an error**  
+**We check that the entered data is positive, because we can't go back**  
+**we check if the added day exceeds the number of days in the month or the number of months exceeds 12, we will increase the month or year**  
+**After changing the dates, we go to the hotel rooms, delete those whose dates of stay have ended, and if people have made reservations on this date, we update the status and capacity of the rooms**
 
 client.cpp:  
 ![alt text](pictures/passday1.png "passDay1")  
 server.cpp:  
 ![alt text](pictures/passday2.png "passDay2")
 
-### دستور `Edit information`:
-در این بخش اگر کاربر، یوزر معمولی باشد، میتواند اطلاعاتی از قبیل رمز، شماره تلفن و آدرس را تغییر دهد ولی اگر ادمین باشد، تنها میتواند رمزش را عوض کند. بررسی میکنیم که تمامی اطلاعات وارد شده با اطلاعات قبلی کاربر یکسان نباشد. زیرا میخواهیم حداقل یکی از اطلاعات خواسته شده تغییر کنند و اگر کاربر همه اطلاعات را همان اطلاعات قبلی وارد کرد، به او خطا نمایش دهیم. شرط هایی که در این قسمت در نظر گرفته ایم، شامل موارد زیر است:  
+### Command `Edit information`:
 
-**اگر کاربر معمولی باشد، شماره تلفن وارد شده حتما شامل عدد باشد**  
-**تمامی اطلاعات وارد شده نباید با اطلاعات قبلی کاربر یکسان باشد**  
+In this section, if the user is a normal user, he can change information such as password, phone number, and address, but if he is an administrator, he can only change his password. We check that all the entered information is not the same as the user's previous information. Because we want to change at least one of the requested information and show an error if the user enters all the same information as before. The conditions that we have considered in this section include the following:
+
+**If the user is a normal user, the entered phone number must contain numbers**  
+**All entered information must not be the same as the user's previous information**
 
 client.cpp  
 ![alt text](pictures/editInformation1.png "editInformation1")  
 UserInfo.json  
-![alt text](pictures/editInformation2.png "editInformation2")  
+![alt text](pictures/editInformation2.png "editInformation2")
 
-### دستور `leaving room`:  
-این دستور شامل کاربر معمولی و ادمین میباشد. ابتدا بخش مربوط به کاربر معمولی را بررسی میکنیم:  
+### Command `leaving room`:
 
-#### کاربر معمولی  
-کاربر معمولی با زدن این دستور، میتواند اتاق را زودتر از زمان تخلیه، خالی کند. اما شرط هایی باید در اینجا چک شود. به عنوان مثال یکی از شرط های تخلیه کردن زودهنگام اتاق این است که از تاریخ رزرو این کاربر گذشته باشد. یعنی کاربر در اتاق اقامت داشته باشد و سپس قصد خروج از اتاق را داشته باشد. شرط هایی که در این قسمت چک میکنیم عبارتند از:  
+This command includes normal user and admin. First, let's check the section related to the normal user:
 
-**ورودی داده شده خالی نباشد**  
-**چک میکنیم شماره اتاق وارد شده حتما به صورت عدد باشد**  
-**با توجه به شماره اتاق بررسی میکنیم این اتاق وجود دارد یا خیر**  
-**با توجه به آیدی فرد موردنظر بررسی میکنیم آیا این فرد در این اتاق قرار دارد یا خیر**  
-**تاریخ شروع اقامت فرد موردنظر را با زمان حال مقایسه میکنیم. اگر اقامت فرد هنوز شروع نشده بود، ارور میدهیم**  
+#### Normal user
+
+By typing this command, the normal user can empty the room earlier than the emptying time. But there are conditions to be checked here. For example, one of the conditions for early vacating the room is that the reservation date of this user has passed. It means that the user stays in the room and then intends to leave the room. The terms we check in this section are:
+
+**Input should not be empty**  
+**We will check that the entered room number must be a number**  
+**According to the room number, we will check if this room exists or not**  
+**According to the ID of the person in question, we will check if this person is in this room or not**  
+**We compare the start date of the desired person's stay with the current time. If the person's stay has not started yet, we will give an error**
 
 ![alt text](pictures/leaveroom_user.png "leaveroom_user")
 
-#### ادمین  
-ادمین میتواند ظرفیت یک اتاق را به 0 برساند و همه افرادی که اتاق را رزرو کرده اند، را از اتاق حذف کند. برای آسانی کار، ظرفیت را 0 در نظر میگیریم(این مسئله در جلسه توجیحی گفته شده است) پس یکی از شرط های خطا برای مقدار ظرفیت این است که مخالف صفر باشد. از طرف دیگر بعد از اینکه ادمین این کامند را انتخاب کرد، در همان لحظه تمامی افراد اتاق موردنظر(در صورت وجود) از لیست افراد داخل آن اتاق حذف میشوند. شرط هایی که در این قسمت بررسی کرده ایم، در زیر آمده است:  
+#### Admin
 
-**ورودی داده شده خالی نباشد**  
-**شماره اتاق و یا مقدار ظرفیت حتما مقدار عددی داشته باشند**  
-**با توجه به شماره اتاق بررسی میکنیم این اتاق وجود دارد یا خیر**  
-**با توجه به ظرفیت اتاق بررسی میکنیم آیا ظرفیت اتاق صفر است یا خیر**  
-**چک میکنیم ظرفیت داده شده بیشتر از ظرفیت ماکسیمم اتاق نباشد**  
+Admin can reduce the capacity of a room to 0 and remove all the people who have reserved the room from the room. For ease of work, we consider the capacity to be 0 (this problem was mentioned in the clarification session), so one of the error conditions for the capacity value is that it is opposite to zero. On the other hand, after the admin selects this command, all the people in the desired room (if any) will be removed from the list of people in that room. The terms we have reviewed in this section are as follows:
+
+**Input should not be empty**  
+**The room number or the capacity must have a numeric value**  
+**According to the room number, we will check if this room exists or not**  
+**According to the room capacity, we check whether the room capacity is zero or not**  
+**We check that the given capacity is not more than the maximum capacity of the room**
 
 ![alt text](pictures/leaveroom_admin.png "leaveroom_admin")
 ![alt text](pictures/leaveroom_admin2.png "leaveroom_admin2")
 
-### دستور `Rooms`:
-این  بخش از سه دستور تشکیل شده است که هرکدام به نوبت توضیح میدهیم.  
-دستور اول مربوط به اضافه کردن اتاق است. شرط های این قسمت به شرح زیر میباشد:  
+### Command `Rooms`:
 
-**چک میکنیم که کاربر موردنظر ادمین باشد**  
-**ورودی های داده شده خالی نباشد**  
-**چک میکنیم که تمامی فیلد های موردنظر، مقدار عددی داشته باشند**  
-**بررسی میکنیم اتاق موردنظر وجود دارد یا خیر، اگر وجود داشت، ارور مربوط به خودش را میدهیم**  
+This section consists of three commands, each of which we explain in turn.  
+The first command is about adding a room. The terms of this section are as follows:
+
+**We check that the desired user is an admin**  
+**Given entries should not be empty**  
+**We check that all the desired fields have a numerical value**  
+**We will check whether the desired room exists or not, if it exists, we will give the corresponding error**
 
 ![alt text](pictures/room_add1.png "rooms_add1")
 ![alt text](pictures/room_add2.png "rooms_add2")
 
-دستور دوم مربوط به تغییرات یک اتاق است. شرط های این قسمت به شرح زیر میباشد:  
+The second order is related to changes in a room. The terms of this section are as follows:
 
-**چک میکنیم که کاربر موردنظر ادمین باشد**  
-**ورودی های داده شده خالی نباشد**  
-**چک میکنیم که تمامی فیلد های موردنظر، مقدار عددی داشته باشند**  
-**بررسی میکنیم اتاق موردنظر وجود دارد یا خیر، اگر وجود نداشت، ارور مربوط به خودش را میدهیم**  
-**بررسی میکنیم که اتاق ظرفیتش به طور کامل پر نباشد. زیرا در اینصورت نباید تغییری در اتاق صورت بگیرد**  
-**چک میکنیم مقادیر وارد شده با مقادیر قبلی یکسان نباشند، اگر بود، ارور میدهیم**  
+**We check that the desired user is an admin**  
+**Given entries should not be empty**  
+**We check that all the desired fields have a numerical value**  
+**We check whether the desired room exists or not, if it does not exist, we give the corresponding error**  
+**We check that the capacity room is not completely full. Because in this case, there should be no change in the room**  
+**We check that the entered values are not the same as the previous values, if they are, we will give an error**
 
 ![alt text](pictures/room_edit1.png "rooms_edit1")
 ![alt text](pictures/room_edit2.png "rooms_edit2")
 
-دستور سوم مربوط به حذف یک اتاق است که شرط های آن را بررسی میکنیم:  
+The third command is related to the removal of a room, which we check its conditions:
 
-**چک میکنیم که کاربر موردنظر ادمین باشد**  
-**ورودی های داده شده خالی نباشد**  
-**چک میکنیم که تمامی فیلد های موردنظر، مقدار عددی داشته باشند**  
-**بررسی میکنیم اتاق موردنظر وجود دارد یا خیر، اگر وجود نداشت، ارور مربوط به خودش را میدهیم**  
-**بررسی میکنیم که اتاق ظرفیتش به طور کامل پر نباشد. زیرا در اینصورت نباید تغییری در اتاق صورت بگیرد**  
+**We check that the desired user is an admin**  
+**Given entries should not be empty**  
+**We check that all the desired fields have a numerical value**  
+**We check whether the desired room exists or not, if it does not exist, we give the corresponding error**  
+**We check that the capacity room is not completely full. Because in this case, there should be no change in the room**
 
 ![alt text](pictures/room_delete.png "rooms_delete")
 
-### دستور `logout`:
-این دستور برای خروج از حساب کاربری ست و پس از زدن این کامند، کاربر از حساب خود خارج میشود و منوی اولیه به او نشان داده میشود. همچنین این فرد را از لیست افرادی که لاگین کرده اند نیز حذف میکنیم. این قسمت شرط خاصی ندارد و نیاز به بررسی چیزی نیست.  
+### Command `logout`:
+
+This command is for logging out of the user account and after typing this command, the user will log out of his account and the main menu will be shown to him. We will also remove this person from the list of people who have logged in. This part does not have any special conditions and there is no need to check anything.
 
 ![alt text](pictures/logout.png "logout")
 
-## پیام های خطا:  
-همانطور که در پی دی اف ذکر شده است، به ازای خطاهای مختلف، باید پیام های خطای متفاوتی را به کاربر نشان دهیم. برای آسان شدن این کار، تمامی پیام های خطا به شکل زیر define شده اند و در مواجه با خطایی، پیام مربوط به آن را به کاربر نشان میدهیم. در قسمت قبل تمامی دستورات و شرط های آنها را بررسی کرده ایم. اگر شرطی برقرار نباشد، با استفاده از پیام های خطا، به کاربر اطلاع دهیم که چه خطایی رخ داده است. هدف از این کار این است که کاربر بتواند خطا را برطرف کند و دوباره دستور خود را اجرا کند.  
+## Error messages:
+
+As mentioned in the PDF, for different errors, we need to show different error messages to the user. To make this easy, all the error messages are defined as follows, and in case of an error, we show the corresponding message to the user. In the previous part, we have reviewed all the orders and their conditions. If a condition is not met, use error messages to inform the user what error has occurred. The purpose of this is to allow the user to fix the error and re-execute their command.
 
 ![alt text](pictures/errors.png "errors")
 
-## جمع بندی:  
-در این پروژه با برنامه نویسی سوکت و همچنین نحوه مبادله کردن پیام بین سرور و کلاینت آشنا شدیم. از طرف دیگر هندل کردن دستورات هتل نیز چالش دیگر این پروژه بود. علاوه بر آن، مدیریت
+## Conclusion:
+
+In this project, we learned about socket programming and how to exchange messages between the server and the client. On the other hand, handling hotel orders was another challenge of this project.
